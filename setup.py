@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    Setup file for ite_api.
+    Setup file for ite.
     Use setup.cfg to configure your project.
 
     This file was generated with PyScaffold 3.3.1.
@@ -8,6 +8,7 @@
     Learn more under: https://pyscaffold.org/
 """
 import sys
+
 from pkg_resources import VersionConflict, require
 from setuptools import setup
 

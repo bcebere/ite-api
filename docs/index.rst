@@ -1,8 +1,8 @@
 =======
-ite-api
+ite
 =======
 
-This is the documentation of **ite-api**.
+This is the documentation of **ite**.
 
 .. note::
 

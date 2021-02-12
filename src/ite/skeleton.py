@@ -5,7 +5,7 @@ console script. To run this script uncomment the following lines in the
 [options.entry_points] section in setup.cfg:
 
     console_scripts =
-         fibonacci = ite_api.skeleton:run
+         fibonacci = ite.skeleton:run
 
 Then run `python setup.py install` which will install the command `fibonacci`
 inside your current environment.
@@ -18,8 +18,9 @@ Note: This skeleton file can be safely removed if not needed!
 import argparse
 import logging
 import sys
+from typing import Any
 
-from ite_api import __version__
+from ite import __version__
 
 __author__ = "Cebere Bogdan"
 __copyright__ = "Cebere Bogdan"
@@ -28,7 +29,7 @@ __license__ = "mit"
 _logger = logging.getLogger(__name__)
 
 
-def fib(n):
+def fib(n: int) -> int:
     """Fibonacci example function
 
     Args:
@@ -44,7 +45,7 @@ def fib(n):
     return a
 
 
-def parse_args(args):
+def parse_args(args: Any) -> Any:
     """Parse command line parameters
 
     Args:
@@ -57,7 +58,7 @@ def parse_args(args):
     parser.add_argument(
         "--version",
         action="version",
-        version="ite-api {ver}".format(ver=__version__),
+        version=f"ite {__version__}",
     )
     parser.add_argument(dest="n", help="n-th Fibonacci number", type=int, metavar="INT")
     parser.add_argument(
@@ -79,7 +80,7 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def setup_logging(loglevel):
+def setup_logging(loglevel: Any) -> None:
     """Setup basic logging
 
     Args:
@@ -91,7 +92,7 @@ def setup_logging(loglevel):
     )
 
 
-def main(args):
+def main(args: Any) -> None:
     """Main entry point allowing external calls
 
     Args:
@@ -100,11 +101,11 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
     _logger.debug("Starting crazy calculations...")
-    print("The {}-th Fibonacci number is {}".format(args.n, fib(args.n)))
+    print(f"The {args.n}-th Fibonacci number is {fib(args.n)}")
     _logger.info("Script ends here")
 
 
-def run():
+def run() -> None:
     """Entry point for console_scripts"""
     main(sys.argv[1:])
 

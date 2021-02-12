@@ -7,15 +7,15 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import os
-import sys
 import inspect
+import os
 import shutil
+import sys
 
 # -- Path setup --------------------------------------------------------------
 
 __location__ = os.path.join(
-    os.getcwd(), os.path.dirname(inspect.getfile(inspect.currentframe()))
+    os.getcwd(), os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 )
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -37,7 +37,7 @@ except ImportError:
     from sphinx import apidoc
 
 output_dir = os.path.join(__location__, "api")
-module_dir = os.path.join(__location__, "../src/ite_api")
+module_dir = os.path.join(__location__, "../src/ite")
 try:
     shutil.rmtree(output_dir)
 except FileNotFoundError:
@@ -56,7 +56,7 @@ try:
 
     apidoc.main(args)
 except Exception as e:
-    print("Running `sphinx-apidoc` failed!\n{}".format(e))
+    print(f"Running `sphinx-apidoc` failed!\n{e}")
 
 # -- General configuration ---------------------------------------------------
 
@@ -91,7 +91,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "ite-api"
+project = "ite"
 copyright = "2021, Cebere Bogdan"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -150,10 +150,7 @@ html_theme = "alabaster"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-    "sidebar_width": "300px",
-    "page_width": "1200px"
-}
+html_theme_options = {"sidebar_width": "300px", "page_width": "1200px"}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
@@ -161,7 +158,7 @@ html_theme_options = {
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
 try:
-    from ite_api import __version__ as version
+    from ite import __version__ as version
 except ImportError:
     pass
 else:
@@ -226,12 +223,12 @@ html_static_path = ["_static"]
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "ite_api-doc"
+htmlhelp_basename = "ite-doc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
 
-latex_elements = {
+latex_elements = {  # type: ignore
     # The paper size ("letterpaper" or "a4paper").
     # "papersize": "letterpaper",
     # The font size ("10pt", "11pt" or "12pt").
@@ -243,7 +240,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "user_guide.tex", "ite-api Documentation", "Cebere Bogdan", "manual")
+    ("index", "user_guide.tex", "ite Documentation", "Cebere Bogdan", "manual")
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

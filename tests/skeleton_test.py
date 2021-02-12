@@ -2,14 +2,14 @@
 
 import pytest
 
-from ite_api.skeleton import fib
+from ite.skeleton import fib
 
 __author__ = "Cebere Bogdan"
 __copyright__ = "Cebere Bogdan"
 __license__ = "mit"
 
 
-def test_fib():
+def test_fib() -> None:
     assert fib(1) == 1
     assert fib(2) == 1
     assert fib(7) == 13
