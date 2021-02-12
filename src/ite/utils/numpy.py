@@ -9,7 +9,7 @@ import numpy as np
 import scipy
 
 
-def compute_PEHE(T_true: np.ndarray, T_est: np.ndarray) -> float:
+def PEHE(T_true: np.ndarray, T_est: np.ndarray) -> float:
 
     return np.sqrt(np.mean((T_true.reshape((-1, 1)) - T_est.reshape((-1, 1))) ** 2))
 

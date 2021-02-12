@@ -20,8 +20,10 @@ from make_data import sample_IHDP
 from models.causal_models import CMGP
 import numpy as np
 import utilmlab
-from utils.metrics import compute_PEHE
-from utils.metrics import mean_confidence_interval
+
+# ite relative
+from ..utils.numpy import PEHE
+from ..utils.numpy import mean_confidence_interval
 
 initpath_alg.init_sys_path()
 
@@ -46,8 +48,8 @@ def run_experiment(
     TE_est_test = model.predict(X_test)[0]
     TE_est_train = model.predict(X_train)[0]
 
-    PEHE_train = compute_PEHE(TE_est_train, T_true_train)
-    PEHE_test = compute_PEHE(TE_est_test, T_true_test)
+    PEHE_train = PEHE(TE_est_train, T_true_train)
+    PEHE_test = PEHE(TE_est_test, T_true_test)
 
     return PEHE_train, PEHE_test
 
