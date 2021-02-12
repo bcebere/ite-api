@@ -1,5 +1,8 @@
+numpy
 pre-commit
 pyscaffold
 pytest
 pytest-cov
+scipy
 setuptools
+tensorflow

@@ -12,7 +12,7 @@ def PEHE(y: tf.Variable, hat_y: tf.Variable) -> tf.Variable:
         hat_y: estimated outcome.
     """
     return tf.reduce_mean(
-        tf.squared_difference((y[:, 1] - y[:, 0]), (hat_y[:, 1] - hat_y[:, 0]))
+        tf.math.squared_difference((y[:, 1] - y[:, 0]), (hat_y[:, 1] - hat_y[:, 0]))
     )
 
 
@@ -81,6 +81,6 @@ def xavier_init(size: tf.Variable) -> tf.Variable:
     Args:
         size: Shape of the tensor.
     """
-    in_dim = size[0]
+    in_dim = tf.cast(size[0], tf.float32)
     xavier_stddev = 1.0 / tf.sqrt(in_dim / 2.0)
-    return tf.random_normal(shape=size, stddev=xavier_stddev)
+    return tf.random.normal(shape=size, stddev=xavier_stddev)

@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-from pkg_resources import DistributionNotFound, get_distribution
+# third party
+from pkg_resources import DistributionNotFound
+from pkg_resources import get_distribution
+
+# ite relative
+from . import utils  # noqa: F401
 
 try:
     # Change here if project is renamed and does not equal the package name

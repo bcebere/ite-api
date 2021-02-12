@@ -6,7 +6,7 @@ from typing import Tuple
 
 # third party
 import numpy as np
-import scipy
+from scipy import stats
 
 
 def PEHE(T_true: np.ndarray, T_est: np.ndarray) -> float:
@@ -31,7 +31,7 @@ def mean_confidence_interval(
     """
     a = 1.0 * np.array(data)
     n = len(a)
-    m, se = np.mean(a), scipy.stats.sem(a)
-    h = se * scipy.stats.t.ppf((1 + confidence) / 2.0, n - 1)
+    m, se = np.mean(a), stats.sem(a)
+    h = se * stats.t.ppf((1 + confidence) / 2.0, n - 1)
 
     return m, h
