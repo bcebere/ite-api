@@ -1,23 +1,18 @@
 # Dataset import (Jinsung Yoon, 10/11/2017)
 
 # stdlib
-import argparse
-from typing import Any
 from typing import List
 
 # third party
-import initpath_alg
 import numpy as np
-import pandas as pd
 from scipy.special import expit
-import utilmlab
-
-initpath_alg.init_sys_path()
 
 
-def Data_Twins(fn_csv: str, train_rate: float = 0.8) -> List[Any]:
+def load(fn_csv: str, train_rate: float = 0.8) -> List[np.ndarray]:
     """
-    Input: train_rate: 0.8
+    Input:
+        fn_csv: Path to the input CSV to load
+        train_rate: Train/Test split
     Outputs:
         - Train_X, Test_X: Train and Test features
         - Train_Y: Observable outcomes
@@ -86,38 +81,3 @@ def Data_Twins(fn_csv: str, train_rate: float = 0.8) -> List[Any]:
     Test_Y = Opt_Y[test_idx, :]
 
     return [Train_X, Train_T, Train_Y, Opt_Train_Y, Test_X, Test_Y]
-
-
-def init_arg() -> Any:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", default="twins")
-    parser.add_argument("--trainx", default="trainx.csv")
-    parser.add_argument("--trainy", default="trainy.csv")
-    parser.add_argument("--traint", default="traint.csv")
-    parser.add_argument("--testx", default="testx.csv")
-    parser.add_argument("--testy", default="testy.csv")
-    parser.add_argument("--testt", default="testt.csv")
-    return parser.parse_args()
-
-
-if __name__ == "__main__":
-
-    args = init_arg()
-    dataset = args.dataset
-    fn_trainx, fn_trainy, fn_traint = args.trainx, args.trainy, args.traint
-    fn_testx, fn_testy, fn_testt = args.testx, args.testy, args.testt
-
-    if dataset == "twins":
-        train_rate = 0.8
-        fn_twins_csv = utilmlab.get_data_dir() + "/twins/Twin_Data.csv.gz"
-        [Train_X, Train_T, Train_Y, Opt_Train_Y, Test_X, Test_Y] = Data_Twins(
-            fn_twins_csv, train_rate
-        )
-    else:
-        assert 0
-
-    pd.DataFrame(Train_X).to_csv(fn_trainx, index=False)
-    pd.DataFrame(Train_Y).to_csv(fn_trainy, index=False)
-    pd.DataFrame(Train_T).to_csv(fn_traint, index=False)
-    pd.DataFrame(Test_X).to_csv(fn_testx, index=False)
-    pd.DataFrame(Test_Y).to_csv(fn_testy, index=False)
