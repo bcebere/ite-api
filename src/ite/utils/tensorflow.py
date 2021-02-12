@@ -1,6 +1,6 @@
 # third party
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def PEHE(y: tf.Variable, hat_y: tf.Variable) -> tf.Variable:

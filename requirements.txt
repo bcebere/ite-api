@@ -1,8 +1,11 @@
 numpy
+pandas
 pre-commit
 pyscaffold
 pytest
 pytest-cov
 scipy
 setuptools
+sklearn
 tensorflow
+tqdm

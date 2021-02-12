@@ -11,7 +11,7 @@ from typing import Any
 # third party
 import numpy as np
 import pandas as pd
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tqdm import tqdm
 
 # ite relative
@@ -20,6 +20,8 @@ from ..utils.tensorflow import ATT
 from ..utils.tensorflow import PEHE
 from ..utils.tensorflow import RPol
 from ..utils.tensorflow import xavier_init
+
+tf.disable_v2_behavior()
 
 
 # 3.1 Generator

@@ -15,16 +15,15 @@ DATASET = "Twin_Data.csv.gz"
 URL = "https://bitbucket.org/mvdschaar/mlforhealthlabpub/raw/0b0190bcd38a76c405c805f1ca774971fcd85233/data/twins/Twin_Data.csv.gz"  # noqa: E501
 
 
-def preprocess(fn_csv: Path, train_rate: float = 0.8) -> List[np.ndarray]:
+def preprocess(fn_csv: Path) -> List[np.ndarray]:
     """
     Input:
         fn_csv: Path to the input CSV to load
-        train_rate: Train/Test split
     Outputs:
-        - Train_X, Test_X: Train and Test features
-        - Train_Y: Observable outcomes
-        - Train_T: Assigned treatment
-        - Opt_Train_Y, Test_Y: Potential outcomes.
+        X: Feature Vector
+        T: Treatment Vector
+        Y: Observable Outcomes
+        Opt_Y: Potential Outcomes
     """
     # Data Input (11400 patients, 30 features, 2 potential outcomes)
     Data = np.loadtxt(fn_csv, delimiter=",", skiprows=1)
@@ -73,7 +72,36 @@ def preprocess(fn_csv: Path, train_rate: float = 0.8) -> List[np.ndarray]:
         ],
     )
 
-    # Train / Test Division
+    return [
+        X,
+        T,
+        Y,
+        Opt_Y,
+    ]
+
+
+def train_test_split(
+    X: np.ndarray,
+    T: np.ndarray,
+    Y: np.ndarray,
+    Opt_Y: np.ndarray,
+    train_rate: float = 0.8,
+) -> List[np.ndarray]:
+    """
+    Input:
+        X: Feature Vector
+        T: Treatment Vector
+        Y: Observable Outcomes
+        Opt_Y: Potential Outcomes
+        train_rate: Train/Test split
+    Outputs:
+        - Train_X, Test_X: Train and Test features
+        - Train_Y: Observable outcomes
+        - Train_T: Assigned treatment
+        - Opt_Train_Y, Test_Y: Potential outcomes.
+    """
+    No = len(X)
+
     temp = np.random.permutation(No)
     Train_No = int(train_rate * No)
     train_idx = temp[:Train_No]
@@ -94,4 +122,7 @@ def load(data_path: Path, train_split: float = 0.8) -> List[np.ndarray]:
     csv = data_path / DATASET
 
     download_if_needed(csv, URL)
-    return preprocess(csv, train_split)
+
+    [X, T, Y, Opt_Y] = preprocess(csv)
+
+    return train_test_split(X, T, Y, Opt_Y, train_split)
