@@ -10,7 +10,7 @@ import pandas as pd
 # ite relative
 from ..utils.tensorflow import ATE
 from ..utils.tensorflow import PEHE
-from ..utils.tensorflow import Perf_RPol_ATT
+from ..utils.tensorflow import RPol
 
 
 def init_arg() -> Any:
@@ -42,7 +42,7 @@ if __name__ == "__main__":
         result["ATE"] = float(ATE(df_ref.values, df_hat.values))
     else:
         result["Perf_RPol_ATT"] = float(
-            Perf_RPol_ATT(df_ref_treatment.values, df_ref.values, df_hat.values)[0]
+            RPol(df_ref_treatment.values, df_ref.values, df_hat.values)
         )
     print(result)
     with open(fn_json, "w") as fp:

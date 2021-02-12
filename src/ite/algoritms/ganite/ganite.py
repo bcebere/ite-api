@@ -7,7 +7,6 @@ import argparse
 import json
 import os
 from typing import Any
-from typing import List
 
 # third party
 import numpy as np
@@ -17,25 +16,10 @@ from tqdm import tqdm
 
 # ite relative
 from ..utils.tensorflow import ATE
+from ..utils.tensorflow import ATT
 from ..utils.tensorflow import PEHE
-from ..utils.tensorflow import Perf_RPol_ATT
+from ..utils.tensorflow import RPol
 from ..utils.tensorflow import xavier_init
-
-
-def init_arg() -> Any:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--alpha", default=1, type=float)
-    parser.add_argument("--kk", default=10, type=int)
-    parser.add_argument("--it", default=10000, type=int)
-    parser.add_argument("-o", default="./result.json")
-    parser.add_argument("-ocsv")
-    parser.add_argument("--trainx", default="trainx.csv")
-    parser.add_argument("--trainy", default="trainy.csv")
-    parser.add_argument("--traint")
-    parser.add_argument("--testx", default="testx.csv")
-    parser.add_argument("--testy", default="testy.csv")
-    parser.add_argument("--testt")
-    return parser.parse_args()
 
 
 # 3.1 Generator
@@ -88,14 +72,25 @@ def inference(x: tf.Variable) -> tf.Variable:
     return I_prob
 
 
-# Random sample generator for Z and R
-def sample_Z(m: int, n: int) -> List[float]:
-    return np.random.uniform(-1.0, 1.0, size=[m, n])
-
-
 def sample_X(X: tf.Variable, size: int) -> int:
     start_idx = np.random.randint(0, X.shape[0], size)
     return start_idx
+
+
+def init_arg() -> Any:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--alpha", default=1, type=float)
+    parser.add_argument("--kk", default=10, type=int)
+    parser.add_argument("--it", default=10000, type=int)
+    parser.add_argument("-o", default="./result.json")
+    parser.add_argument("-ocsv")
+    parser.add_argument("--trainx", default="trainx.csv")
+    parser.add_argument("--trainy", default="trainy.csv")
+    parser.add_argument("--traint")
+    parser.add_argument("--testx", default="testx.csv")
+    parser.add_argument("--testy", default="testy.csv")
+    parser.add_argument("--testt")
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
@@ -345,7 +340,8 @@ if __name__ == "__main__":
             result = {"alpha": alpha, "kk": num_kk}
             if Test_T is not None:
                 Hat_curr = sess.run([Hat], feed_dict={X: Test_X})[0]
-                [R_Pol_Out, B] = Perf_RPol_ATT(Test_T, Test_Y, Hat_curr)
+                R_Pol_Out = RPol(Test_T, Test_Y, Hat_curr)
+                B = ATT(Test_T, Test_Y, Hat_curr)
 
                 print(f"Iter: {it}")
                 print(f"I_loss: {I_loss_curr:.4}")
@@ -374,7 +370,8 @@ if __name__ == "__main__":
     if fn_csv is not None:
         Hat_curr = sess.run([Hat], feed_dict={X: Test_X})[0]
         if Test_T is not None:
-            [R_Pol_Out, B] = Perf_RPol_ATT(Test_T, Test_Y, Hat_curr)
+            R_Pol_Out = RPol(Test_T, Test_Y, Hat_curr)
+            B = ATT(Test_T, Test_Y, Hat_curr)
         df = pd.DataFrame(Hat_curr, columns=["A", "B"])
         df.to_csv(fn_csv, index=False)
 
