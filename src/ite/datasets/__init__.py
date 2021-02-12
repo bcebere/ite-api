@@ -1,9 +1,20 @@
 # stdlib
+import os
+from pathlib import Path
 from typing import List
 
 # third party
-from loaders import twins
 import numpy as np
+
+# ite relative
+from .loaders import twins
+
+DATA_PATH = Path(os.path.dirname(__file__)) / Path("data")
+
+try:
+    os.mkdir(DATA_PATH)
+except BaseException:
+    pass
 
 
 def load(dataset: str, train_split: float = 0.8) -> List[np.ndarray]:
@@ -17,6 +28,6 @@ def load(dataset: str, train_split: float = 0.8) -> List[np.ndarray]:
         - Opt_Train_Y, Test_Y: Potential outcomes.
     """
     if dataset == "twins":
-        return twins.load(train_split)
+        return twins.load(DATA_PATH, train_split)
     else:
         raise Exception("Unsupported dataset")

@@ -1,14 +1,21 @@
 # Dataset import (Jinsung Yoon, 10/11/2017)
 
 # stdlib
+from pathlib import Path
 from typing import List
 
 # third party
 import numpy as np
 from scipy.special import expit
 
+# ite absolute
+from ite.utils.network import download_if_needed
 
-def load(fn_csv: str, train_rate: float = 0.8) -> List[np.ndarray]:
+DATASET = "Twin_Data.csv.gz"
+URL = "https://bitbucket.org/mvdschaar/mlforhealthlabpub/raw/0b0190bcd38a76c405c805f1ca774971fcd85233/data/twins/Twin_Data.csv.gz"  # noqa: E501
+
+
+def preprocess(fn_csv: Path, train_rate: float = 0.8) -> List[np.ndarray]:
     """
     Input:
         fn_csv: Path to the input CSV to load
@@ -81,3 +88,10 @@ def load(fn_csv: str, train_rate: float = 0.8) -> List[np.ndarray]:
     Test_Y = Opt_Y[test_idx, :]
 
     return [Train_X, Train_T, Train_Y, Opt_Train_Y, Test_X, Test_Y]
+
+
+def load(data_path: Path, train_split: float = 0.8) -> List[np.ndarray]:
+    csv = data_path / DATASET
+
+    download_if_needed(csv, URL)
+    return preprocess(csv, train_split)

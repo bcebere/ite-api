@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
+# stdlib
+import os
+
 # third party
 from pkg_resources import DistributionNotFound
 from pkg_resources import get_distribution
 
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
 # ite relative
-from . import utils  # noqa: F401
+from . import datasets  # noqa: F401,E402
+from . import utils  # noqa: F401,E402
 
 try:
     # Change here if project is renamed and does not equal the package name
