@@ -29,7 +29,6 @@ def test_sanity() -> None:
     "alpha,beta,batch_size,depth,dim_hidden",
     [
         (2, 2, 128, 5, 8),  # Optimal Hyper-parameters of GANITE(Table 7 in the paper)
-        (1, 1, 256, 5, 0),  # Defaults
     ],
 )
 @pytest.mark.xfail

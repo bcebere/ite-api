@@ -183,7 +183,7 @@ class Ganite:
         minibatch_size: int = 256,
         depth: int = 1,
         num_iterations: int = 10000,
-        test_step: int = 50,
+        test_step: int = 200,
         num_discr_iterations: int = 10,
     ) -> None:
         self.minibatch_size = minibatch_size

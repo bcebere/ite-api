@@ -113,7 +113,7 @@ class GaniteTorch:
         minibatch_size: int = 256,
         depth: int = 1,
         num_iterations: int = 10000,
-        test_step: int = 50,
+        test_step: int = 200,
         num_discr_iterations: int = 10,
     ) -> None:
         # Hyperparameters
@@ -170,7 +170,11 @@ class GaniteTorch:
         self.inference_nets.train()
 
         for it in tqdm(range(self.num_iterations)):
+            self.G_solver.zero_grad()
+
             for kk in range(self.num_discr_iterations):
+                self.D_solver.zero_grad()
+
                 idx_mb = sample_X(Train_X, self.minibatch_size)
                 X_mb = Train_X[idx_mb, :]
                 T_mb = Train_T[idx_mb].reshape([self.minibatch_size, 1])
@@ -180,7 +184,7 @@ class GaniteTorch:
                 D_out = self.counterfactual_discriminator(X_mb, T_mb, Y_mb, Tilde)
 
                 D_loss = torch_utils.sigmoid_cross_entropy_with_logits(T_mb, D_out)
-                self.D_solver.zero_grad()
+
                 D_loss.backward(retain_graph=True)
                 self.D_solver.step()
 
@@ -203,8 +207,8 @@ class GaniteTorch:
                 )
             )
             G_loss = G_loss_R + self.alpha * G_loss_GAN
-            self.G_solver.zero_grad()
-            G_loss.backward(retain_graph=True)
+
+            G_loss.backward()
             self.G_solver.step()
 
             # Testing
@@ -219,6 +223,7 @@ class GaniteTorch:
 
         # Train I and ID
         for it in tqdm(range(self.num_iterations)):
+            self.I_solver.zero_grad()
 
             idx_mb = sample_X(Train_X, self.minibatch_size)
             X_mb = Train_X[idx_mb, :]
@@ -242,8 +247,7 @@ class GaniteTorch:
             )
             I_loss = I_loss1 + self.beta * I_loss2
 
-            self.I_solver.zero_grad()
-            I_loss.backward(retain_graph=True)
+            I_loss.backward()
             self.I_solver.step()
 
             # Testing
