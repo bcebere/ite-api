@@ -16,7 +16,7 @@ def test_sanity() -> None:
 @pytest.mark.parametrize(
     "iterations",
     [
-        1000,
+        10000,
     ],
 )
 @pytest.mark.parametrize(
@@ -93,5 +93,7 @@ def test_ganite_short_training(
     assert predicted.shape == (Test_X.shape[0], 2)
 
     test_metrics = model.test(Test_X, Test_Y)
-    assert "Loss_sqrt_PEHE" in test_metrics
-    assert "Loss_ATE" in test_metrics
+    assert "sqrt_PEHE" in test_metrics
+    assert "ATE" in test_metrics
+
+    assert 0.28 < test_metrics["sqrt_PEHE"] and test_metrics["sqrt_PEHE"] < 0.31

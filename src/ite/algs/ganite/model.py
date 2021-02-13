@@ -268,11 +268,6 @@ class Ganite:
 
         self.I_loss = self.I_loss1 + self.beta * self.I_loss2
 
-        # Loss Followup
-        self.Hat_Y = self.Hat
-        self.Loss_sqrt_PEHE = tf_utils.sqrt_PEHE(self.Y_T, self.Hat_Y)
-        self.Loss_ATE = tf_utils.ATE(self.Y_T, self.Hat_Y)
-
         # Solver
         self.G_solver = tf.train.AdamOptimizer().minimize(
             self.G_loss, var_list=self.counterfactual_generator.theta_G
@@ -361,12 +356,12 @@ class Ganite:
 
                 metrics["ite_block"]["I_loss"].append(I_loss_curr)
                 metrics["ite_block"]["Loss_sqrt_PEHE"].append(
-                    metrics_for_step["Loss_sqrt_PEHE"]
+                    metrics_for_step["sqrt_PEHE"]
                 )
-                metrics["ite_block"]["Loss_ATE"].append(metrics_for_step["Loss_ATE"])
+                metrics["ite_block"]["Loss_ATE"].append(metrics_for_step["ATE"])
 
-                Loss_sqrt_PEHE = metrics_for_step["Loss_sqrt_PEHE"]
-                Loss_ATE = metrics_for_step["Loss_ATE"]
+                Loss_sqrt_PEHE = metrics_for_step["sqrt_PEHE"]
+                Loss_ATE = metrics_for_step["ATE"]
 
                 print(f"Iter: {it}")
                 print(f"I_loss: {I_loss_curr:.4}")
@@ -381,20 +376,15 @@ class Ganite:
         return pd.DataFrame(Hat_curr, columns=["A", "B"])
 
     def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> pd.DataFrame:
-        X_minibatch = Test_X
-        Y_T_minibatch = Test_Y
+        Loss_sqrt_PEHE = tf_utils.sqrt_PEHE(self.Y_T, self.Hat)
+        Loss_ATE = tf_utils.ATE(self.Y_T, self.Hat)
 
-        hat = self.inference_nets.forward(self.X)
-        hat_Y = self.sess.run(
-            [hat],
-            feed_dict={self.X: X_minibatch, self.Y_T: Y_T_minibatch},
-        )[0]
+        sqrt_PEHE, ATE = self.sess.run(
+            [Loss_sqrt_PEHE, Loss_ATE],
+            feed_dict={self.X: Test_X, self.Y_T: Test_Y},
+        )
 
         return {
-            "Loss_sqrt_PEHE": float(
-                tf_utils.sqrt_PEHE(Y_T_minibatch, hat_Y).eval(session=self.sess)
-            ),
-            "Loss_ATE": float(
-                tf_utils.ATE(Y_T_minibatch, hat_Y).eval(session=self.sess)
-            ),
+            "sqrt_PEHE": float(sqrt_PEHE),
+            "ATE": float(ATE),
         }
