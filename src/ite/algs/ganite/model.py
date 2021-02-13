@@ -15,32 +15,32 @@ tf.disable_v2_behavior()
 
 
 class CounterfactualGenerator:
-    def __init__(self, Dim: int) -> None:
+    def __init__(self, Dim: int, DimHidden: int) -> None:
         # Generator Layer
         self.G_W1 = tf.Variable(
-            tf_utils.xavier_init([(Dim + 2), Dim])
+            tf_utils.xavier_init([(Dim + 2), DimHidden])
         )  # Inputs: X + Treatment (1) + Factual Outcome (1) + Random Vector (Z)
-        self.G_b1 = tf.Variable(tf.zeros(shape=[Dim]))
+        self.G_b1 = tf.Variable(tf.zeros(shape=[DimHidden]))
 
-        self.G_W2 = tf.Variable(tf_utils.xavier_init([Dim, Dim]))
-        self.G_b2 = tf.Variable(tf.zeros(shape=[Dim]))
+        self.G_W2 = tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))
+        self.G_b2 = tf.Variable(tf.zeros(shape=[DimHidden]))
 
-        self.G_W31 = tf.Variable(tf_utils.xavier_init([Dim, Dim]))
+        self.G_W31 = tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))
         self.G_b31 = tf.Variable(
-            tf.zeros(shape=[Dim])
+            tf.zeros(shape=[DimHidden])
         )  # Output: Estimated Potential Outcomes
 
-        self.G_W32 = tf.Variable(tf_utils.xavier_init([Dim, 1]))
+        self.G_W32 = tf.Variable(tf_utils.xavier_init([DimHidden, 1]))
         self.G_b32 = tf.Variable(
             tf.zeros(shape=[1])
         )  # Output: Estimated Potential Outcomes
 
-        self.G_W41 = tf.Variable(tf_utils.xavier_init([Dim, Dim]))
+        self.G_W41 = tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))
         self.G_b41 = tf.Variable(
-            tf.zeros(shape=[Dim])
+            tf.zeros(shape=[DimHidden])
         )  # Output: Estimated Potential Outcomes
 
-        self.G_W42 = tf.Variable(tf_utils.xavier_init([Dim, 1]))
+        self.G_W42 = tf.Variable(tf_utils.xavier_init([DimHidden, 1]))
         self.G_b42 = tf.Variable(
             tf.zeros(shape=[1])
         )  # Output: Estimated Potential Outcomes
@@ -77,16 +77,16 @@ class CounterfactualGenerator:
 
 
 class CounterfactualDiscriminator:
-    def __init__(self, Dim: int) -> None:
+    def __init__(self, Dim: int, DimHidden: int) -> None:
         self.D_W1 = tf.Variable(
-            tf_utils.xavier_init([(Dim + 2), Dim])
+            tf_utils.xavier_init([(Dim + 2), DimHidden])
         )  # Inputs: X + Factual Outcomes + Estimated Counterfactual Outcomes
-        self.D_b1 = tf.Variable(tf.zeros(shape=[Dim]))
+        self.D_b1 = tf.Variable(tf.zeros(shape=[DimHidden]))
 
-        self.D_W2 = tf.Variable(tf_utils.xavier_init([Dim, Dim]))
-        self.D_b2 = tf.Variable(tf.zeros(shape=[Dim]))
+        self.D_W2 = tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))
+        self.D_b2 = tf.Variable(tf.zeros(shape=[DimHidden]))
 
-        self.D_W3 = tf.Variable(tf_utils.xavier_init([Dim, 1]))
+        self.D_W3 = tf.Variable(tf_utils.xavier_init([DimHidden, 1]))
         self.D_b3 = tf.Variable(tf.zeros(shape=[1]))
 
         self.theta_D = [
@@ -115,23 +115,23 @@ class CounterfactualDiscriminator:
 
 
 class InferenceNets:
-    def __init__(self, Dim: int) -> None:
-        self.I_W1 = tf.Variable(tf_utils.xavier_init([(Dim), Dim]))
-        self.I_b1 = tf.Variable(tf.zeros(shape=[Dim]))
+    def __init__(self, Dim: int, DimHidden: int) -> None:
+        self.I_W1 = tf.Variable(tf_utils.xavier_init([(Dim), DimHidden]))
+        self.I_b1 = tf.Variable(tf.zeros(shape=[DimHidden]))
 
-        self.I_W2 = tf.Variable(tf_utils.xavier_init([Dim, Dim]))
-        self.I_b2 = tf.Variable(tf.zeros(shape=[Dim]))
+        self.I_W2 = tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))
+        self.I_b2 = tf.Variable(tf.zeros(shape=[DimHidden]))
 
-        self.I_W31 = tf.Variable(tf_utils.xavier_init([Dim, Dim]))
-        self.I_b31 = tf.Variable(tf.zeros(shape=[Dim]))
+        self.I_W31 = tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))
+        self.I_b31 = tf.Variable(tf.zeros(shape=[DimHidden]))
 
-        self.I_W32 = tf.Variable(tf_utils.xavier_init([Dim, 1]))
+        self.I_W32 = tf.Variable(tf_utils.xavier_init([DimHidden, 1]))
         self.I_b32 = tf.Variable(tf.zeros(shape=[1]))
 
-        self.I_W41 = tf.Variable(tf_utils.xavier_init([Dim, Dim]))
-        self.I_b41 = tf.Variable(tf.zeros(shape=[Dim]))
+        self.I_W41 = tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))
+        self.I_b41 = tf.Variable(tf.zeros(shape=[DimHidden]))
 
-        self.I_W42 = tf.Variable(tf_utils.xavier_init([Dim, 1]))
+        self.I_W42 = tf.Variable(tf_utils.xavier_init([DimHidden, 1]))
         self.I_b42 = tf.Variable(tf.zeros(shape=[1]))
 
         self.theta_I = [
@@ -173,13 +173,23 @@ class Ganite:
     def __init__(
         self,
         dim: int,
+        dim_hidden: int,
         dim_out: int,
         alpha: float = 1,
+        beta: float = 1,
         minibatch_size: int = 256,
         depth: int = 1,
+        num_iterations: int = 10000,
+        test_step: int = 100,
+        num_discr_iterations: int = 10,
     ) -> None:
         self.minibatch_size = minibatch_size
         self.alpha = alpha
+        self.beta = beta
+        self.depth = depth
+        self.num_iterations = num_iterations
+        self.test_step = test_step
+        self.num_discr_iterations = num_discr_iterations
 
         tf.reset_default_graph()
 
@@ -195,13 +205,13 @@ class Ganite:
 
         # 2. layer construction
         # 2.1 Generator Layer
-        self.counterfactual_generator = CounterfactualGenerator(dim)
+        self.counterfactual_generator = CounterfactualGenerator(dim, dim_hidden)
 
         # 2.2 Discriminator
-        self.counterfactual_discriminator = CounterfactualDiscriminator(dim)
+        self.counterfactual_discriminator = CounterfactualDiscriminator(dim, dim_hidden)
 
         # 2.3 Inference Layer
-        self.inference_nets = InferenceNets(dim)
+        self.inference_nets = InferenceNets(dim, dim_hidden)
 
         # Structure
         # 1. Generator
@@ -251,7 +261,7 @@ class Ganite:
             )
         )
 
-        self.I_loss = self.I_loss1 + self.I_loss2
+        self.I_loss = self.I_loss1 + self.beta * self.I_loss2
 
         # Loss Followup
         self.Hat_Y = self.Hat
@@ -280,12 +290,7 @@ class Ganite:
         Train_Y: pd.DataFrame,
         Test_X: pd.DataFrame,
         Test_Y: pd.DataFrame,
-        num_iterations: int = 10000,
-        test_step: int = 100,
-        num_kk: int = 10,
     ) -> dict:
-        # Iterations
-        # Train G and D first
         metrics: dict = {
             "gen_block": {
                 "D_loss": [],
@@ -297,8 +302,11 @@ class Ganite:
                 "Loss_ATE": [],
             },
         }
-        for it in tqdm(range(num_iterations)):
-            for kk in range(num_kk):
+
+        # Iterations
+        # Train G and D first
+        for it in tqdm(range(self.num_iterations)):
+            for kk in range(self.num_discr_iterations):
                 idx_mb = sample_X(Train_X, self.minibatch_size)
                 X_mb = Train_X[idx_mb, :]
                 T_mb = np.reshape(Train_T[idx_mb], [self.minibatch_size, 1])
@@ -320,7 +328,7 @@ class Ganite:
             )
 
             # Testing
-            if it % test_step == 0:
+            if it % self.test_step == 0:
                 metrics["gen_block"]["D_loss"].append(D_loss_curr)
                 metrics["gen_block"]["G_loss"].append(G_loss_curr)
 
@@ -330,7 +338,7 @@ class Ganite:
                 print()
 
         # Train I and ID
-        for it in tqdm(range(num_iterations)):
+        for it in tqdm(range(self.num_iterations)):
 
             idx_mb = sample_X(Train_X, self.minibatch_size)
             X_mb = Train_X[idx_mb, :]
@@ -343,7 +351,7 @@ class Ganite:
             )
 
             # Testing
-            if it % test_step == 0:
+            if it % self.test_step == 0:
                 New_X_mb = Test_X
                 Y_T_mb = Test_Y
 

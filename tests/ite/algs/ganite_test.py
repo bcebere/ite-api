@@ -10,17 +10,31 @@ import ite.datasets as ds
 
 
 def test_sanity() -> None:
-    assert alg.Ganite(10, 2) is not None
+    assert alg.Ganite(10, 10, 2) is not None
 
 
 @pytest.mark.parametrize(
     "iterations",
     [
-        1000,
         10000,
     ],
 )
-def test_ganite_short_training(plt: Any, iterations: int) -> None:
+@pytest.mark.parametrize(
+    "alpha,beta,batch_size,depth,dim_hidden",
+    [
+        (2, 2, 128, 5, 8),  # Optimal Hyper-parameters of GANITE(Table 7 in the paper)
+        (1, 1, 256, 5, 0),  # Defaults
+    ],
+)
+def test_ganite_short_training(
+    plt: Any,
+    iterations: int,
+    alpha: float,
+    beta: float,
+    batch_size: int,
+    depth: int,
+    dim_hidden: int,
+) -> None:
     train_ratio = 0.8
 
     [Train_X, Train_T, Train_Y, Opt_Train_Y, Test_X, Test_Y] = ds.load(
@@ -28,12 +42,22 @@ def test_ganite_short_training(plt: Any, iterations: int) -> None:
     )
 
     dim = len(Train_X[0])
+    dim_hidden = dim if dim_hidden == 0 else dim_hidden
     dim_outcome = Test_Y.shape[1]
 
-    model = alg.Ganite(dim, dim_outcome)
+    model = alg.Ganite(
+        dim,
+        dim_hidden,
+        dim_outcome,
+        num_iterations=iterations,
+        alpha=alpha,
+        beta=beta,
+        minibatch_size=batch_size,
+        depth=depth,
+    )
     assert model is not None
 
-    metrics = model.fit(Train_X, Train_T, Train_Y, Test_X, Test_Y, iterations)
+    metrics = model.fit(Train_X, Train_T, Train_Y, Test_X, Test_Y)
 
     assert "gen_block" in metrics
     assert "D_loss" in metrics["gen_block"]
