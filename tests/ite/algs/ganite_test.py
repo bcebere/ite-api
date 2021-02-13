@@ -16,7 +16,13 @@ def test_sanity() -> None:
 @pytest.mark.parametrize(
     "iterations",
     [
-        10000,
+        1000,
+    ],
+)
+@pytest.mark.parametrize(
+    "num_discr_iterations",
+    [
+        10,
     ],
 )
 @pytest.mark.parametrize(
@@ -29,6 +35,7 @@ def test_sanity() -> None:
 def test_ganite_short_training(
     plt: Any,
     iterations: int,
+    num_discr_iterations: int,
     alpha: float,
     beta: float,
     batch_size: int,
@@ -54,6 +61,7 @@ def test_ganite_short_training(
         beta=beta,
         minibatch_size=batch_size,
         depth=depth,
+        num_discr_iterations=num_discr_iterations,
     )
     assert model is not None
 
@@ -80,3 +88,7 @@ def test_ganite_short_training(
     predicted = model.predict(Test_X)
 
     assert predicted.shape == (Test_X.shape[0], 2)
+
+    test_metrics = model.test(Test_X, Test_Y)
+    assert "Loss_PEHE" in test_metrics
+    assert "Loss_ATE" in test_metrics

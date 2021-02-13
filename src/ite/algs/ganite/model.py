@@ -13,9 +13,11 @@ import ite.utils.tensorflow as tf_utils
 
 tf.disable_v2_behavior()
 
+# TODO: use depth for GANs
+
 
 class CounterfactualGenerator:
-    def __init__(self, Dim: int, DimHidden: int) -> None:
+    def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
         # Generator Layer
         self.G_W1 = tf.Variable(
             tf_utils.xavier_init([(Dim + 2), DimHidden])
@@ -77,7 +79,7 @@ class CounterfactualGenerator:
 
 
 class CounterfactualDiscriminator:
-    def __init__(self, Dim: int, DimHidden: int) -> None:
+    def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
         self.D_W1 = tf.Variable(
             tf_utils.xavier_init([(Dim + 2), DimHidden])
         )  # Inputs: X + Factual Outcomes + Estimated Counterfactual Outcomes
@@ -115,7 +117,7 @@ class CounterfactualDiscriminator:
 
 
 class InferenceNets:
-    def __init__(self, Dim: int, DimHidden: int) -> None:
+    def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
         self.I_W1 = tf.Variable(tf_utils.xavier_init([(Dim), DimHidden]))
         self.I_b1 = tf.Variable(tf.zeros(shape=[DimHidden]))
 
@@ -180,7 +182,7 @@ class Ganite:
         minibatch_size: int = 256,
         depth: int = 1,
         num_iterations: int = 10000,
-        test_step: int = 100,
+        test_step: int = 50,
         num_discr_iterations: int = 10,
     ) -> None:
         self.minibatch_size = minibatch_size
@@ -205,13 +207,15 @@ class Ganite:
 
         # 2. layer construction
         # 2.1 Generator Layer
-        self.counterfactual_generator = CounterfactualGenerator(dim, dim_hidden)
+        self.counterfactual_generator = CounterfactualGenerator(dim, dim_hidden, depth)
 
         # 2.2 Discriminator
-        self.counterfactual_discriminator = CounterfactualDiscriminator(dim, dim_hidden)
+        self.counterfactual_discriminator = CounterfactualDiscriminator(
+            dim, dim_hidden, depth
+        )
 
         # 2.3 Inference Layer
-        self.inference_nets = InferenceNets(dim, dim_hidden)
+        self.inference_nets = InferenceNets(dim, dim_hidden, depth)
 
         # Structure
         # 1. Generator
@@ -352,26 +356,35 @@ class Ganite:
 
             # Testing
             if it % self.test_step == 0:
-                New_X_mb = Test_X
-                Y_T_mb = Test_Y
-
-                Loss1_curr, Loss2_curr, Hat_curr = self.sess.run(
-                    [self.Loss1, self.Loss2, self.Hat],
-                    feed_dict={self.X: New_X_mb, self.Y_T: Y_T_mb},
-                )
-
-                metrics["ite_block"]["I_loss"].append(I_loss_curr)
-                metrics["ite_block"]["Loss_PEHE"].append(float(np.sqrt(Loss1_curr)))
-                metrics["ite_block"]["Loss_ATE"].append(float(Loss2_curr))
-
                 print(f"Iter: {it}")
                 print(f"I_loss: {I_loss_curr:.4}")
-                print(f"Loss_PEHE_Out: {np.sqrt(Loss1_curr):.4}")
-                print(f"Loss_ATE_Out: {Loss2_curr:.4}")
-                print("")
+
+                metrics_for_step = self.test(Test_X, Test_Y)
+
+                metrics["ite_block"]["I_loss"].append(I_loss_curr)
+                metrics["ite_block"]["Loss_PEHE"].append(metrics_for_step["Loss_PEHE"])
+                metrics["ite_block"]["Loss_ATE"].append(metrics_for_step["Loss_ATE"])
 
         return metrics
 
     def predict(self, Test_X: pd.DataFrame) -> pd.DataFrame:
         Hat_curr = self.sess.run([self.Hat], feed_dict={self.X: Test_X})[0]
         return pd.DataFrame(Hat_curr, columns=["A", "B"])
+
+    def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> pd.DataFrame:
+        New_X_mb = Test_X
+        Y_T_mb = Test_Y
+
+        Loss1_curr, Loss2_curr, Hat_curr = self.sess.run(
+            [self.Loss1, self.Loss2, self.Hat],
+            feed_dict={self.X: New_X_mb, self.Y_T: Y_T_mb},
+        )
+
+        print(f"Loss_PEHE_Out: {np.sqrt(Loss1_curr):.4}")
+        print(f"Loss_ATE_Out: {Loss2_curr:.4}")
+        print("")
+
+        return {
+            "Loss_PEHE": float(np.sqrt(Loss1_curr)),
+            "Loss_ATE": float(Loss2_curr),
+        }
