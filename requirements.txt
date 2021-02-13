@@ -10,4 +10,5 @@ scipy
 setuptools
 sklearn
 tensorflow
+torch
 tqdm
