@@ -32,6 +32,7 @@ def test_sanity() -> None:
         (1, 1, 256, 5, 0),  # Defaults
     ],
 )
+@pytest.mark.xfail
 def test_ganite_short_training(
     plt: Any,
     iterations: int,
