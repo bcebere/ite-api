@@ -8,9 +8,10 @@ from pkg_resources import get_distribution
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
-# ite relative
-from . import datasets  # noqa: F401,E402
-from . import utils  # noqa: F401,E402
+# ite absolute
+import ite.algs  # noqa: F401,E402
+import ite.datasets  # noqa: F401,E402
+import ite.utils  # noqa: F401,E402
 
 try:
     # Change here if project is renamed and does not equal the package name
