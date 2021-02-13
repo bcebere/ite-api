@@ -170,31 +170,38 @@ def sample_X(X: tf.Variable, size: int) -> int:
 
 
 class Ganite:
-    def __init__(self, Dim: int, DimOutCome: int, alpha: float = 1) -> None:
-        self.mb_size = 256
+    def __init__(
+        self,
+        dim: int,
+        dim_out: int,
+        alpha: float = 1,
+        minibatch_size: int = 256,
+        depth: int = 1,
+    ) -> None:
+        self.minibatch_size = minibatch_size
         self.alpha = alpha
 
         tf.reset_default_graph()
 
         # 1. Input
         # 1.1. Feature (X)
-        self.X = tf.placeholder(tf.float32, shape=[None, Dim])
+        self.X = tf.placeholder(tf.float32, shape=[None, dim])
         # 1.2. Treatment (T)
         self.T = tf.placeholder(tf.float32, shape=[None, 1])
         # 1.3. Outcome (Y)
         self.Y = tf.placeholder(tf.float32, shape=[None, 1])
         # 1.6. Test Outcome (Y_T) - Potential outcome
-        self.Y_T = tf.placeholder(tf.float32, shape=[None, DimOutCome])
+        self.Y_T = tf.placeholder(tf.float32, shape=[None, dim_out])
 
         # 2. layer construction
         # 2.1 Generator Layer
-        self.counterfactual_generator = CounterfactualGenerator(Dim)
+        self.counterfactual_generator = CounterfactualGenerator(dim)
 
         # 2.2 Discriminator
-        self.counterfactual_discriminator = CounterfactualDiscriminator(Dim)
+        self.counterfactual_discriminator = CounterfactualDiscriminator(dim)
 
         # 2.3 Inference Layer
-        self.inference_nets = InferenceNets(Dim)
+        self.inference_nets = InferenceNets(dim)
 
         # Structure
         # 1. Generator
@@ -274,28 +281,38 @@ class Ganite:
         Test_X: pd.DataFrame,
         Test_Y: pd.DataFrame,
         num_iterations: int = 10000,
-    ) -> None:
-        num_kk = 10
-
+        test_step: int = 100,
+        num_kk: int = 10,
+    ) -> dict:
         # Iterations
         # Train G and D first
+        metrics: dict = {
+            "gen_block": {
+                "D_loss": [],
+                "G_loss": [],
+            },
+            "ite_block": {
+                "I_loss": [],
+                "Loss_PEHE": [],
+                "Loss_ATE": [],
+            },
+        }
         for it in tqdm(range(num_iterations)):
-
             for kk in range(num_kk):
-                idx_mb = sample_X(Train_X, self.mb_size)
+                idx_mb = sample_X(Train_X, self.minibatch_size)
                 X_mb = Train_X[idx_mb, :]
-                T_mb = np.reshape(Train_T[idx_mb], [self.mb_size, 1])
-                Y_mb = np.reshape(Train_Y[idx_mb], [self.mb_size, 1])
+                T_mb = np.reshape(Train_T[idx_mb], [self.minibatch_size, 1])
+                Y_mb = np.reshape(Train_Y[idx_mb], [self.minibatch_size, 1])
 
                 _, D_loss_curr = self.sess.run(
                     [self.D_solver, self.D_loss],
                     feed_dict={self.X: X_mb, self.T: T_mb, self.Y: Y_mb},
                 )
 
-            idx_mb = sample_X(Train_X, self.mb_size)
+            idx_mb = sample_X(Train_X, self.minibatch_size)
             X_mb = Train_X[idx_mb, :]
-            T_mb = np.reshape(Train_T[idx_mb], [self.mb_size, 1])
-            Y_mb = np.reshape(Train_Y[idx_mb], [self.mb_size, 1])
+            T_mb = np.reshape(Train_T[idx_mb], [self.minibatch_size, 1])
+            Y_mb = np.reshape(Train_Y[idx_mb], [self.minibatch_size, 1])
 
             _, G_loss_curr, Tilde_curr = self.sess.run(
                 [self.G_solver, self.G_loss, self.Tilde],
@@ -303,20 +320,22 @@ class Ganite:
             )
 
             # Testing
-            if it % 100 == 0:
+            if it % test_step == 0:
+                metrics["gen_block"]["D_loss"].append(D_loss_curr)
+                metrics["gen_block"]["G_loss"].append(G_loss_curr)
+
                 print(f"Iter: {it}")
                 print(f"D_loss: {D_loss_curr:.4}")
                 print(f"G_loss: {G_loss_curr:.4}")
                 print()
 
         # Train I and ID
-        result = {}
         for it in tqdm(range(num_iterations)):
 
-            idx_mb = sample_X(Train_X, self.mb_size)
+            idx_mb = sample_X(Train_X, self.minibatch_size)
             X_mb = Train_X[idx_mb, :]
-            T_mb = np.reshape(Train_T[idx_mb], [self.mb_size, 1])
-            Y_mb = np.reshape(Train_Y[idx_mb], [self.mb_size, 1])
+            T_mb = np.reshape(Train_T[idx_mb], [self.minibatch_size, 1])
+            Y_mb = np.reshape(Train_Y[idx_mb], [self.minibatch_size, 1])
 
             _, I_loss_curr = self.sess.run(
                 [self.I_solver, self.I_loss],
@@ -324,8 +343,7 @@ class Ganite:
             )
 
             # Testing
-            if it % 100 == 0:
-                result = {"alpha": self.alpha, "kk": num_kk}
+            if it % test_step == 0:
                 New_X_mb = Test_X
                 Y_T_mb = Test_Y
 
@@ -334,13 +352,17 @@ class Ganite:
                     feed_dict={self.X: New_X_mb, self.Y_T: Y_T_mb},
                 )
 
+                metrics["ite_block"]["I_loss"].append(I_loss_curr)
+                metrics["ite_block"]["Loss_PEHE"].append(float(np.sqrt(Loss1_curr)))
+                metrics["ite_block"]["Loss_ATE"].append(float(Loss2_curr))
+
                 print(f"Iter: {it}")
                 print(f"I_loss: {I_loss_curr:.4}")
                 print(f"Loss_PEHE_Out: {np.sqrt(Loss1_curr):.4}")
                 print(f"Loss_ATE_Out: {Loss2_curr:.4}")
                 print("")
-                result["Loss_PEHE_Out"] = float(np.sqrt(Loss1_curr))
-                result["Loss_ATE_Out"] = float(Loss2_curr)
+
+        return metrics
 
     def predict(self, Test_X: pd.DataFrame) -> pd.DataFrame:
         Hat_curr = self.sess.run([self.Hat], feed_dict={self.X: Test_X})[0]
