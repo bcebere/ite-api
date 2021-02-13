@@ -73,22 +73,25 @@ def test_ganite_short_training(
 
     assert "ite_block" in metrics
     assert "I_loss" in metrics["ite_block"]
-    assert "Loss_PEHE" in metrics["ite_block"]
+    assert "Loss_sqrt_PEHE" in metrics["ite_block"]
     assert "Loss_ATE" in metrics["ite_block"]
 
-    fig, axs = plt.subplots(2)
-    axs[0].plot(metrics["gen_block"]["D_loss"], label="Cf Discriminator loss")
-    axs[0].plot(metrics["gen_block"]["G_loss"], label="Cf Generator loss")
-    axs[0].legend()
-    axs[1].plot(metrics["ite_block"]["I_loss"], label="ITE loss")
-    axs[1].plot(metrics["ite_block"]["Loss_PEHE"], label="Loss_PEHE")
-    axs[1].plot(metrics["ite_block"]["Loss_ATE"], label="Loss_ATE")
-    axs[1].legend()
+    try:
+        fig, axs = plt.subplots(2)
+        axs[0].plot(metrics["gen_block"]["D_loss"], label="Cf Discriminator loss")
+        axs[0].plot(metrics["gen_block"]["G_loss"], label="Cf Generator loss")
+        axs[0].legend()
+        axs[1].plot(metrics["ite_block"]["I_loss"], label="ITE loss")
+        axs[1].plot(metrics["ite_block"]["Loss_sqrt_PEHE"], label="Loss_PEHE")
+        axs[1].plot(metrics["ite_block"]["Loss_ATE"], label="Loss_ATE")
+        axs[1].legend()
+    except BaseException as e:
+        print("failed to plot(maybe rerun with --plots):", e)
 
     predicted = model.predict(Test_X)
 
     assert predicted.shape == (Test_X.shape[0], 2)
 
     test_metrics = model.test(Test_X, Test_Y)
-    assert "Loss_PEHE" in test_metrics
+    assert "Loss_sqrt_PEHE" in test_metrics
     assert "Loss_ATE" in test_metrics

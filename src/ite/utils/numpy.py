@@ -9,7 +9,7 @@ import numpy as np
 from scipy import stats
 
 
-def PEHE(T_true: np.ndarray, T_est: np.ndarray) -> float:
+def sqrt_PEHE(T_true: np.ndarray, T_est: np.ndarray) -> float:
     """
     Precision in Estimation of Heterogeneous Effect(Numpy version).
     PEHE reflects the ability to capture individual variation in treatment effects.

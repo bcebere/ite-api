@@ -19,7 +19,7 @@ import ite
 def test_numpy_PEHE(y: Any, y_hat: Any, expected: float) -> None:
     mock_y = np.array(y)
     mock_y_hat = np.array(y_hat)
-    assert ite.utils.numpy.PEHE(mock_y, mock_y_hat) > 0
+    assert ite.utils.numpy.sqrt_PEHE(mock_y, mock_y_hat) > 0
 
 
 @pytest.mark.parametrize(

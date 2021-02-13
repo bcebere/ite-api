@@ -2,7 +2,7 @@
 import tensorflow.compat.v1 as tf
 
 
-def PEHE(y: tf.Variable, hat_y: tf.Variable) -> tf.Variable:
+def sqrt_PEHE(y: tf.Variable, hat_y: tf.Variable) -> tf.Variable:
     """
     Precision in Estimation of Heterogeneous Effect(Tensorflow version).
     PEHE reflects the ability to capture individual variation in treatment effects.
@@ -10,8 +10,14 @@ def PEHE(y: tf.Variable, hat_y: tf.Variable) -> tf.Variable:
         y: expected outcome.
         hat_y: estimated outcome.
     """
-    return tf.reduce_mean(
-        tf.math.squared_difference((y[:, 1] - y[:, 0]), (hat_y[:, 1] - hat_y[:, 0]))
+    y_cast = tf.cast(y, tf.float64)
+    hat_y_cast = tf.cast(hat_y, tf.float64)
+    return tf.sqrt(
+        tf.reduce_mean(
+            tf.math.squared_difference(
+                (y_cast[:, 1] - y_cast[:, 0]), (hat_y_cast[:, 1] - hat_y_cast[:, 0])
+            )
+        )
     )
 
 
@@ -23,8 +29,11 @@ def ATE(y: tf.Variable, hat_y: tf.Variable) -> tf.Variable:
         y: expected outcome.
         hat_y: estimated outcome.
     """
+    y_cast = tf.cast(y, tf.float64)
+    hat_y_cast = tf.cast(hat_y, tf.float64)
     return tf.abs(
-        tf.reduce_mean(y[:, 1] - y[:, 0]) - tf.reduce_mean(hat_y[:, 1] - hat_y[:, 0])
+        tf.reduce_mean(y_cast[:, 1] - y_cast[:, 0])
+        - tf.reduce_mean(hat_y_cast[:, 1] - hat_y_cast[:, 0])
     )
 
 

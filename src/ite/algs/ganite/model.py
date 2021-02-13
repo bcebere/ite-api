@@ -14,6 +14,7 @@ import ite.utils.tensorflow as tf_utils
 tf.disable_v2_behavior()
 
 # TODO: use depth for GANs
+# TODO: fix Test metrics
 
 
 class CounterfactualGenerator:
@@ -269,8 +270,8 @@ class Ganite:
 
         # Loss Followup
         self.Hat_Y = self.Hat
-        self.Loss1 = tf_utils.PEHE(self.Y_T, self.Hat_Y)
-        self.Loss2 = tf_utils.ATE(self.Y_T, self.Hat_Y)
+        self.Loss_sqrt_PEHE = tf_utils.sqrt_PEHE(self.Y_T, self.Hat_Y)
+        self.Loss_ATE = tf_utils.ATE(self.Y_T, self.Hat_Y)
 
         # Solver
         self.G_solver = tf.train.AdamOptimizer().minimize(
@@ -302,7 +303,7 @@ class Ganite:
             },
             "ite_block": {
                 "I_loss": [],
-                "Loss_PEHE": [],
+                "Loss_sqrt_PEHE": [],
                 "Loss_ATE": [],
             },
         }
@@ -356,14 +357,22 @@ class Ganite:
 
             # Testing
             if it % self.test_step == 0:
-                print(f"Iter: {it}")
-                print(f"I_loss: {I_loss_curr:.4}")
-
                 metrics_for_step = self.test(Test_X, Test_Y)
 
                 metrics["ite_block"]["I_loss"].append(I_loss_curr)
-                metrics["ite_block"]["Loss_PEHE"].append(metrics_for_step["Loss_PEHE"])
+                metrics["ite_block"]["Loss_sqrt_PEHE"].append(
+                    metrics_for_step["Loss_sqrt_PEHE"]
+                )
                 metrics["ite_block"]["Loss_ATE"].append(metrics_for_step["Loss_ATE"])
+
+                Loss_sqrt_PEHE = metrics_for_step["Loss_sqrt_PEHE"]
+                Loss_ATE = metrics_for_step["Loss_ATE"]
+
+                print(f"Iter: {it}")
+                print(f"I_loss: {I_loss_curr:.4}")
+                print(f"Loss_sqrt_PEHE_Out: {Loss_sqrt_PEHE:.4}")
+                print(f"Loss_ATE_Out: {Loss_ATE:.4}")
+                print("")
 
         return metrics
 
@@ -372,19 +381,20 @@ class Ganite:
         return pd.DataFrame(Hat_curr, columns=["A", "B"])
 
     def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> pd.DataFrame:
-        New_X_mb = Test_X
-        Y_T_mb = Test_Y
+        X_minibatch = Test_X
+        Y_T_minibatch = Test_Y
 
-        Loss1_curr, Loss2_curr, Hat_curr = self.sess.run(
-            [self.Loss1, self.Loss2, self.Hat],
-            feed_dict={self.X: New_X_mb, self.Y_T: Y_T_mb},
-        )
-
-        print(f"Loss_PEHE_Out: {np.sqrt(Loss1_curr):.4}")
-        print(f"Loss_ATE_Out: {Loss2_curr:.4}")
-        print("")
+        hat = self.inference_nets.forward(self.X)
+        hat_Y = self.sess.run(
+            [hat],
+            feed_dict={self.X: X_minibatch, self.Y_T: Y_T_minibatch},
+        )[0]
 
         return {
-            "Loss_PEHE": float(np.sqrt(Loss1_curr)),
-            "Loss_ATE": float(Loss2_curr),
+            "Loss_sqrt_PEHE": float(
+                tf_utils.sqrt_PEHE(Y_T_minibatch, hat_Y).eval(session=self.sess)
+            ),
+            "Loss_ATE": float(
+                tf_utils.ATE(Y_T_minibatch, hat_Y).eval(session=self.sess)
+            ),
         }
