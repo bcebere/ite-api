@@ -41,21 +41,19 @@ def test_cmgp_short_training(
         )
         assert model is not None
 
-        model.fit(Train_X, Train_T, Train_Y, Test_X, Test_Y)
+        model.train(Train_X, Train_T, Train_Y, Test_X, Test_Y)
 
         train_metrics = model.test(Train_X, Opt_Train_Y)
-        assert "sqrt_PEHE" in train_metrics
-        plot_experiments["train_sqrt_PEHE"].append(train_metrics["sqrt_PEHE"])
+        plot_experiments["train_sqrt_PEHE"].append(train_metrics.sqrt_PEHE())
 
         predicted = model.predict(Test_X)
 
         assert predicted.shape == (Test_X.shape[0], 2)
 
         test_metrics = model.test(Test_X, Test_Y)
-        assert "sqrt_PEHE" in test_metrics
-        plot_experiments["test_sqrt_PEHE"].append(test_metrics["sqrt_PEHE"])
+        plot_experiments["test_sqrt_PEHE"].append(test_metrics.sqrt_PEHE())
 
-        assert 0.2 < test_metrics["sqrt_PEHE"] and test_metrics["sqrt_PEHE"] < 0.4
+        assert 0.2 < test_metrics.sqrt_PEHE() and test_metrics.sqrt_PEHE() < 0.4
 
     train_sqrt_PEHE = plot_experiments["train_sqrt_PEHE"]
     test_sqrt_PEHE = plot_experiments["test_sqrt_PEHE"]

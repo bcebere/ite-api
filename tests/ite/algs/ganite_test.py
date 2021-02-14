@@ -64,7 +64,7 @@ def test_ganite_short_training(
     )
     assert model is not None
 
-    metrics = model.fit(Train_X, Train_T, Train_Y, Test_X, Test_Y)
+    metrics = model.train(Train_X, Train_T, Train_Y, Test_X, Test_Y)
 
     assert "gen_block" in metrics
     assert "D_loss" in metrics["gen_block"]

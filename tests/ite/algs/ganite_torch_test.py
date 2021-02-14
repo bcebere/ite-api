@@ -65,7 +65,7 @@ def test_ganite_torch_short_training(
     )
     assert model is not None
 
-    metrics = model.fit(Train_X, Train_T, Train_Y, Test_X, Test_Y)
+    metrics = model.train(Train_X, Train_T, Train_Y, Test_X, Test_Y)
 
     assert "gen_block" in metrics
     assert "D_loss" in metrics["gen_block"]
@@ -93,7 +93,4 @@ def test_ganite_torch_short_training(
     assert predicted.shape == (Test_X.shape[0], 2)
 
     test_metrics = model.test(Test_X, Test_Y)
-    assert "sqrt_PEHE" in test_metrics
-    assert "ATE" in test_metrics
-
-    assert 0.28 < test_metrics["sqrt_PEHE"] and test_metrics["sqrt_PEHE"] < 0.31
+    assert 0.28 < test_metrics.sqrt_PEHE() and test_metrics.sqrt_PEHE() < 0.31

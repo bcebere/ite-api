@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.neighbors import KNeighborsRegressor
 
 # ite absolute
-import ite.utils.numpy as np_utils
+from ite.utils.metrics import Metrics
 
 
 class CMGP:
@@ -46,7 +46,7 @@ class CMGP:
                 "Invalid value for the input dimension! Input dimension has to be a positive integer."
             )
 
-    def fit(
+    def train(
         self,
         Train_X: pd.DataFrame,
         Train_T: pd.DataFrame,
@@ -110,8 +110,8 @@ class CMGP:
             raise err
 
         epoch_metrics = self.test(Test_X, Test_Y)
-        Loss_sqrt_PEHE = epoch_metrics["sqrt_PEHE"]
-        Loss_ATE = epoch_metrics["ATE"]
+        Loss_sqrt_PEHE = epoch_metrics.sqrt_PEHE()
+        Loss_ATE = epoch_metrics.ATE()
 
         metrics = {
             "Loss_sqrt_PEHE": Loss_sqrt_PEHE,
@@ -174,14 +174,9 @@ class CMGP:
 
         return result
 
-    def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> dict:
+    def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> Metrics:
         Hat_Y = self.predict(Test_X).to_numpy()
-
-        pehe = np_utils.sqrt_PEHE(Hat_Y, Test_Y)
-        return {
-            "sqrt_PEHE": pehe,
-            "ATE": np_utils.ATE(Hat_Y, Test_Y),
-        }
+        return Metrics(Hat_Y, Test_Y)
 
     def initialize_hyperparameters(
         self, X: pd.DataFrame, T: pd.DataFrame, Y: pd.DataFrame

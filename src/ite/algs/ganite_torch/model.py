@@ -6,6 +6,7 @@ from torch import nn
 from tqdm import tqdm
 
 # ite absolute
+from ite.utils.metrics import Metrics
 import ite.utils.torch as torch_utils
 
 
@@ -137,7 +138,7 @@ class GaniteTorch:
         self.D_solver = torch.optim.Adam(self.counterfactual_discriminator.parameters())
         self.I_solver = torch.optim.Adam(self.inference_nets.parameters())
 
-    def fit(
+    def train(
         self,
         df_Train_X: pd.DataFrame,
         df_Train_T: pd.DataFrame,
@@ -254,14 +255,12 @@ class GaniteTorch:
             if it % self.test_step == 0:
                 metrics_for_step = self.test(Test_X.numpy(), Test_Y.numpy())
 
-                metrics["ite_block"]["I_loss"].append(I_loss)
-                metrics["ite_block"]["Loss_sqrt_PEHE"].append(
-                    metrics_for_step["sqrt_PEHE"]
-                )
-                metrics["ite_block"]["Loss_ATE"].append(metrics_for_step["ATE"])
+                Loss_sqrt_PEHE = metrics_for_step.sqrt_PEHE()
+                Loss_ATE = metrics_for_step.ATE()
 
-                Loss_sqrt_PEHE = metrics_for_step["sqrt_PEHE"]
-                Loss_ATE = metrics_for_step["ATE"]
+                metrics["ite_block"]["I_loss"].append(I_loss)
+                metrics["ite_block"]["Loss_sqrt_PEHE"].append(Loss_sqrt_PEHE)
+                metrics["ite_block"]["Loss_ATE"].append(Loss_ATE)
 
                 print(f"Iter: {it}")
                 print(f"I_loss: {I_loss:.4}")
@@ -276,13 +275,7 @@ class GaniteTorch:
         y_hat = self.inference_nets(Test_X).detach().numpy()
         return pd.DataFrame(y_hat, columns=["y_hat_0", "y_hat_1"])
 
-    def test(self, df_Test_X: pd.DataFrame, df_Test_Y: pd.DataFrame) -> dict:
-        Test_X = torch.from_numpy(df_Test_X).float()
-        Test_Y = torch.from_numpy(df_Test_Y).float()
-
+    def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> Metrics:
         hat = self.inference_nets(Test_X)
 
-        return {
-            "sqrt_PEHE": float(torch_utils.sqrt_PEHE(Test_Y, hat)),
-            "ATE": float(torch_utils.ATE(Test_Y, hat)),
-        }
+        return Metrics(hat.to_numpy(), Test_Y)

@@ -281,7 +281,7 @@ class Ganite:
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
 
-    def fit(
+    def train(
         self,
         Train_X: pd.DataFrame,
         Train_T: pd.DataFrame,
