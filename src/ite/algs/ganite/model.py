@@ -13,9 +13,6 @@ import ite.utils.tensorflow as tf_utils
 
 tf.disable_v2_behavior()
 
-# TODO: use depth for GANs
-# TODO: fix Test metrics
-
 
 class CounterfactualGenerator:
     def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
@@ -373,9 +370,9 @@ class Ganite:
 
     def predict(self, Test_X: pd.DataFrame) -> pd.DataFrame:
         Hat_curr = self.sess.run([self.Hat], feed_dict={self.X: Test_X})[0]
-        return pd.DataFrame(Hat_curr, columns=["A", "B"])
+        return pd.DataFrame(Hat_curr, columns=["y_hat_0", "y_hat_1"])
 
-    def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> pd.DataFrame:
+    def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> dict:
         Loss_sqrt_PEHE = tf_utils.sqrt_PEHE(self.Y_T, self.Hat)
         Loss_ATE = tf_utils.ATE(self.Y_T, self.Hat)
 

@@ -3,6 +3,7 @@
 # stdlib
 from pathlib import Path
 from typing import List
+from typing import Optional
 
 # third party
 import numpy as np
@@ -86,6 +87,7 @@ def train_test_split(
     Y: np.ndarray,
     Opt_Y: np.ndarray,
     train_rate: float = 0.8,
+    downsample: Optional[int] = None,
 ) -> List[np.ndarray]:
     """
     Input:
@@ -115,14 +117,26 @@ def train_test_split(
     Test_X = X[test_idx, :]
     Test_Y = Opt_Y[test_idx, :]
 
+    if downsample:
+        if len(Train_X) > downsample:
+            Train_X = Train_X[:downsample]
+            Train_Y = Train_Y[:downsample]
+            Train_T = Train_T[:downsample]
+            Opt_Train_Y = Opt_Train_Y[:downsample]
+        if len(Test_X) > downsample:
+            Test_X = Test_X[:downsample]
+            Test_Y = Test_Y[:downsample]
+
     return [Train_X, Train_T, Train_Y, Opt_Train_Y, Test_X, Test_Y]
 
 
-def load(data_path: Path, train_split: float = 0.8) -> List[np.ndarray]:
+def load(
+    data_path: Path, train_split: float = 0.8, downsample: Optional[int] = None
+) -> List[np.ndarray]:
     csv = data_path / DATASET
 
     download_if_needed(csv, URL)
 
     [X, T, Y, Opt_Y] = preprocess(csv)
 
-    return train_test_split(X, T, Y, Opt_Y, train_split)
+    return train_test_split(X, T, Y, Opt_Y, train_split, downsample)

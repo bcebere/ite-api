@@ -1,3 +1,6 @@
+# stdlib
+from typing import Optional
+
 # third party
 import pytest
 
@@ -14,7 +17,11 @@ def test_sanity() -> None:
     "train_ratio",
     [0.1, 0.5, 0.8],
 )
-def test_dataset_twins_load(train_ratio: float) -> None:
+@pytest.mark.parametrize(
+    "downsample",
+    [None, 100, 1000],
+)
+def test_dataset_twins_load(train_ratio: float, downsample: Optional[int]) -> None:
     # Data Input (11400 patients, 30 features, 2 potential outcomes)
 
     total = 11400
@@ -22,11 +29,16 @@ def test_dataset_twins_load(train_ratio: float) -> None:
     outcomes = 2
 
     [Train_X, Train_T, Train_Y, Opt_Train_Y, Test_X, Test_Y] = ds.load(
-        "twins", train_ratio
+        "twins",
+        train_ratio,
+        downsample=downsample,
     )
 
     train_cnt = int(total * train_ratio)
     test_cnt = total - train_cnt
+    if downsample:
+        train_cnt = min(downsample, train_cnt)
+        test_cnt = min(downsample, test_cnt)
 
     assert Train_X.shape == (train_cnt, feat_count)
     assert Train_T.shape == (train_cnt,)

@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 from typing import List
+from typing import Optional
 
 # third party
 import numpy as np
@@ -17,7 +18,9 @@ except BaseException:
     pass
 
 
-def load(dataset: str, train_split: float = 0.8) -> List[np.ndarray]:
+def load(
+    dataset: str, train_split: float = 0.8, downsample: Optional[int] = None
+) -> List[np.ndarray]:
     """
     Input:
         dataset: the name of the dataset to load
@@ -28,6 +31,6 @@ def load(dataset: str, train_split: float = 0.8) -> List[np.ndarray]:
         - Opt_Train_Y, Test_Y: Potential outcomes.
     """
     if dataset == "twins":
-        return twins.load(DATA_PATH, train_split)
+        return twins.load(DATA_PATH, train_split, downsample)
     else:
         raise Exception("Unsupported dataset")

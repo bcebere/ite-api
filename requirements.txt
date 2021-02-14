@@ -1,3 +1,4 @@
+GPy
 matplotlib
 numpy
 pandas

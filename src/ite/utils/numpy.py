@@ -52,6 +52,17 @@ def RPol(t: np.ndarray, y: np.ndarray, hat_y: np.ndarray) -> np.ndarray:
     return 1 - (RPol1 + RPol0)
 
 
+def ATE(y: np.ndarray, hat_y: np.ndarray) -> np.ndarray:
+    """
+    Average Treatment Effect.
+    ATE measures what is the expected causal effect of the treatment across all individuals in the population.
+    Args:
+        y: expected outcome.
+        hat_y: estimated outcome.
+    """
+    return np.abs(np.mean(y[:, 1] - y[:, 0]) - np.mean(hat_y[:, 1] - hat_y[:, 0]))
+
+
 def ATT(t: np.ndarray, y: np.ndarray, hat_y: np.ndarray) -> np.ndarray:
     """
     Average Treatment Effect on the Treated(ATT).

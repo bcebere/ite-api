@@ -1,17 +1,14 @@
 # Copyright (c) 2019, Ahmed M. Alaa
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
-# stdlib
-from typing import Any
-from typing import Tuple
-
 # third party
 import GPy
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import KNeighborsRegressor
 
-log_2_pi = np.log(2 * np.pi)
+# ite absolute
+import ite.utils.numpy as np_utils
 
 
 class CMGP:
@@ -20,12 +17,14 @@ class CMGP:
 
     """
 
-    # ----------------------------------------------------------------
-    # ----------------------------------------------------------------
-    # This method implements the class constructor, automatically
-    # invoked for every class instance
-    # ----------------------------------------------------------------
-    def __init__(self, mode: str = "CMGP", **kwargs: Any) -> None:
+    def __init__(
+        self,
+        dim: int = 1,
+        dim_outcome: int = 2,
+        mod: str = "Multitask",
+        mode: str = "CMGP",
+        max_gp_iterations: int = 1000,
+    ) -> None:
         """
         Class constructor.
         Initialize a GP object for causal inference.
@@ -35,149 +34,66 @@ class CMGP:
         :kern: ['Matern'] or ['RBF'], Default is the Radial Basis Kernel
         :mkern: For multitask models, can select from IMC and LMC models, default is IMC
         """
-        # %%%%%%%%%%%%%%%%%
-        # **Set defaults**
-        # %%%%%%%%%%%%%%%%%
-        self.kern_list = ["RBF", "Matern"]
-        self.mkern_list = ["ICM", "LCM"]
-        self.mod = "Multitask"
-        self.dim = 1
-        self.kern = self.kern_list[0]
-        self.mkern = self.mkern_list[0]
+        # Setup
+        self.dim = dim
+        self.dim_outcome = dim_outcome
+        self.mod = mod
         self.mode = mode
-        self.Bayesian = True
-        self.Confidence = True
-        # ~~~~~~~~~~~~~~~~~~~~~~~
-        # ** Read input arguments
-        # ~~~~~~~~~~~~~~~~~~~~~~~
-        if kwargs.__contains__("mod"):
-            self.mod = kwargs["mod"]
-        if kwargs.__contains__("dim"):
-            self.dim = kwargs["dim"]
-        if kwargs.__contains__("kern"):
-            self.kern = kwargs["kern"]
-        if kwargs.__contains__("mkern"):
-            self.mkern = kwargs["mkern"]
-        # ++++++++++++++++++++++++++++++++++++++++++
-        # ** catch exceptions ** handle wrong inputs
-        # ++++++++++++++++++++++++++++++++++++++++++
-        try:
-            if (self.dim < 1) or (type(self.dim) != int):
-                raise ValueError(
-                    "Invalid value for the input dimension! Input dimension has to be a positive integer."
-                )
-            if (self.kern not in self.kern_list) or (self.mkern not in self.mkern_list):
-                raise ValueError("Invalid input!")
-            if (kwargs.__contains__("mkern")) and (self.mod != "Multitask"):
-                raise ValueError(
-                    "Invalid input! Multitask kernels are valid only for the Multitask mode"
-                )
+        self.max_gp_iterations = max_gp_iterations
 
-        except ValueError:
-            if self.kern not in self.kern_list:
-                raise ValueError(
-                    "Invalid input: The provided kernel is undefined for class GaussianProcess_Model."
-                )
-            elif self.mkern not in self.mkern_list:
-                raise ValueError(
-                    "Invalid input: The provided Multitask kernel is undefined for class GaussianProcess_Model."
-                )
-            else:
-                raise ValueError("Invalid input for GaussianProcess_Model!")
-        else:
-            # *************************************************************************
-            # Initialize the kernels and likelihoods depending on the specified model
-            # *************************************************************************
-            if self.kern == self.kern_list[0]:
-                base_kernel = GPy.kern.RBF(input_dim=self.dim, ARD=True)
-                self.ker = GPy.util.multioutput.ICM(
-                    self.dim,
-                    2,
-                    base_kernel,
-                    W_rank=1,
-                    W=None,
-                    kappa=None,
-                    name="ICM",
-                )
-            else:
-                self.ker = GPy.kern.Matern32(input_dim=self.dim)
+        if (self.dim < 1) or (type(self.dim) != int):
+            raise ValueError(
+                "Invalid value for the input dimension! Input dimension has to be a positive integer."
+            )
 
-            self.lik = GPy.likelihoods.Gaussian()
-
-    # -----------------------------------------------------------------------------------------------------------
-    # This method optimizes the model hyperparameters using the factual samples for the treated and control arms
-    # ------------------------------------------------------------------------------------------------------------
-    # ** Note ** all inputs to this method are positional arguments
-    # ---------------------------------------------------------------
-    def fit(self, X: pd.DataFrame, Y: pd.DataFrame, W: pd.DataFrame) -> None:
+    def fit(
+        self,
+        Train_X: pd.DataFrame,
+        Train_T: pd.DataFrame,
+        Train_Y: pd.DataFrame,
+        Test_X: pd.DataFrame,
+        Test_Y: pd.DataFrame,
+    ) -> dict:
         """
         Optimizes the model hyperparameters using the factual samples for the treated and control arms.
-        X has to be an N x dim matrix.
+        Train_X has to be an N x dim matrix.
 
-        :X: The input covariates
-        :Y: The corresponding outcomes
-        :W: The treatment assignments
+        :Train_X: The input covariates
+        :Train_T: The treatment assignments
+        :Train_Y: The corresponding outcomes
         """
-        # -----------------------------------------------------------------
-        # Inputs: X (the features), Y (outcomes), W (treatment assignments)
-        # X has to be an N x dim matrix.
-        # -----------------------------------------------------------------
-        # Situate the data in a pandas data frame
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        Dataset = pd.DataFrame(X)
-        Dataset["Y"] = Y
-        Dataset["W"] = W
-
-        self.X_train = np.array(X)
+        # Inputs: Train_X (the features), Train_T (treatment assignments), Train_Y (outcomes)
+        # Train_X has to be an N x dim matrix.
+        Dataset = pd.DataFrame(Train_X)
+        Dataset["Y"] = Train_Y
+        Dataset["T"] = Train_T
 
         if self.dim > 1:
             Feature_names = list(range(self.dim))
         else:
             Feature_names = [0]
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # Catch exceptions: handle errors in the input sizes, size mismatches, or undefined
-        # treatment assignments
-        # ----------------------
-        # try:
-        #    if (Xshape[1] != self.dim) or (Yshape[1] != 1) or (Xshape[0] != Yshape[0]) or (len(W_comp)>0):
-        #        raise ValueError('Invalid Inputs!')
-        # except ValueError:
-        #    if (Xshape[1] != self.dim):
-        #        raise ValueError('Invalid input: Dimension of input covariates do not match the model dimensions')
-        #    elif (Yshape[1] != 1):
-        #        raise ValueError('Invalid input: Outcomes must be formatted in a 1D vector.')
-        #    elif (Xshape[0] != Yshape[0]):
-        #        raise ValueError('Invalid input: Outcomes and covariates do not have the same number of samples.')
-        #    elif (len(W_comp)>0):
-        #        raise ValueError('Invalid input: Treatment assignment vector has non-binary values.')
-        # else:
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        Dataset0 = Dataset[Dataset["W"] == 0].copy()
-        Dataset1 = Dataset[Dataset["W"] == 1].copy()
+
+        Dataset0 = Dataset[Dataset["T"] == 0].copy()
+        Dataset1 = Dataset[Dataset["T"] == 1].copy()
+
         # Extract data for the first learning task (control population)
-        # `````````````````````````````````````````````````````````````````
         X0 = np.reshape(Dataset0[Feature_names].copy(), (len(Dataset0), self.dim))
         y0 = np.reshape(np.array(Dataset0["Y"].copy()), (len(Dataset0), 1))
+
         # Extract data for the second learning task (treated population)
-        # `````````````````````````````````````````````````````````````````
         X1 = np.reshape(Dataset1[Feature_names].copy(), (len(Dataset1), self.dim))
         y1 = np.reshape(np.array(Dataset1["Y"].copy()), (len(Dataset1), 1))
-        # Create an instance of a GPy Coregionalization model
-        # `````````````````````````````````````````````````````````````````
-        K0 = GPy.kern.Matern32(self.dim, ARD=True)  # GPy.kern.RBF(self.dim, ARD=True)
-        K1 = GPy.kern.Matern32(
-            self.dim
-        )  # , ARD=True) #GPy.kern.RBF(self.dim, ARD=True)
 
+        # Create an instance of a GPy Coregionalization model
         K0 = GPy.kern.RBF(self.dim, ARD=True)
         K1 = GPy.kern.RBF(self.dim, ARD=True)
 
         kernel_dict = {
             "CMGP": GPy.util.multioutput.LCM(
-                input_dim=self.dim, num_outputs=2, kernels_list=[K0, K1]
+                input_dim=self.dim, num_outputs=self.dim_outcome, kernels_list=[K0, K1]
             ),
             "NSGP": GPy.util.multioutput.ICM(
-                input_dim=self.dim, num_outputs=2, kernel=K0
+                input_dim=self.dim, num_outputs=self.dim_outcome, kernel=K0
             ),
         }
 
@@ -185,25 +101,29 @@ class CMGP:
             X_list=[X0, X1], Y_list=[y0, y1], kernel=kernel_dict[self.mode]
         )
 
-        # self.initialize_hyperparameters(X, Y, W)
+        self.initialize_hyperparameters(Train_X, Train_T, Train_Y)
 
         try:
-
-            self.model.optimize("bfgs", max_iters=500)
-
+            self.model.optimize("bfgs", max_iters=self.max_gp_iterations, messages=True)
         except np.linalg.LinAlgError as err:
             print("Covariance matrix not invertible. ", err)
+            raise err
 
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        epoch_metrics = self.test(Test_X, Test_Y)
+        Loss_sqrt_PEHE = epoch_metrics["sqrt_PEHE"]
+        Loss_ATE = epoch_metrics["ATE"]
 
-    # -----------------------------------------------------------------------------------------------------------
-    # This method Infers the treatment effect for a certain set of input covariates
-    # ------------------------------------------------------------------------------------------------------------
-    # ** Note ** all inputs to this method are positional arguments
-    # This method returns the predicted ITE and posterior variance
-    # but does not store them in self
-    # ---------------------------------------------------------------
-    def predict(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        metrics = {
+            "Loss_sqrt_PEHE": Loss_sqrt_PEHE,
+            "Loss_ATE": Loss_ATE,
+        }
+        print(f"Loss_sqrt_PEHE_Out: {Loss_sqrt_PEHE:.4}")
+        print(f"Loss_ATE_Out: {Loss_ATE:.4}")
+        print("")
+
+        return metrics
+
+    def predict(self, X: pd.DataFrame) -> pd.DataFrame:
         """
         Infers the treatment effect for a certain set of input covariates.
         Returns the predicted ITE and posterior variance.
@@ -246,24 +166,31 @@ class CMGP:
                 list(self.model.predict(X_1, Y_metadata=noise_dict_1)[0])
             )
 
-        TE_est = Y_est_1 - Y_est_0
+        result = pd.DataFrame(
+            0, index=np.arange(len(Y_est_0)), columns=["y_hat_0", "y_hat_1"]
+        )
+        result["y_hat_0"] = Y_est_0
+        result["y_hat_1"] = Y_est_1
 
-        return TE_est, Y_est_0, Y_est_1
+        return result
 
-    # -----------------------------------------------------------------------------------------------------------
-    # -----------------------------------------------------------------------------------------------------------
-    # This method initializes the model's hyper-parameters before passing to the optimizer
-    # Now working only for the multi-task model
-    # ------------------------------------------------------------------------------------------------------------
+    def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> dict:
+        Hat_Y = self.predict(Test_X).to_numpy()
+
+        return {
+            "sqrt_PEHE": np_utils.sqrt_PEHE(Hat_Y, Test_Y),
+            "ATE": np_utils.ATE(Hat_Y, Test_Y),
+        }
+
     def initialize_hyperparameters(
-        self, X: pd.DataFrame, Y: pd.DataFrame, W: pd.DataFrame
+        self, X: pd.DataFrame, T: pd.DataFrame, Y: pd.DataFrame
     ) -> None:
         """
         Initializes the multi-tasking model's hyper-parameters before passing to the optimizer
 
         :X: The input covariates
+        :T: The treatment assignments
         :Y: The corresponding outcomes
-        :W: The treatment assignments
         """
         # -----------------------------------------------------------------------------------
         # Output Parameters:
@@ -275,26 +202,26 @@ class CMGP:
         # -----------------------------------------------------------------------------------
         Dataset = pd.DataFrame(X)
         Dataset["Y"] = Y
-        Dataset["W"] = W
+        Dataset["T"] = T
 
         if self.dim > 1:
             Feature_names = list(range(self.dim))
         else:
             Feature_names = [0]
 
-        Dataset0 = Dataset[Dataset["W"] == 0]
-        Dataset1 = Dataset[Dataset["W"] == 1]
+        Dataset0 = Dataset[Dataset["T"] == 0]
+        Dataset1 = Dataset[Dataset["T"] == 1]
         neigh0 = KNeighborsRegressor(n_neighbors=10)
         neigh1 = KNeighborsRegressor(n_neighbors=10)
         neigh0.fit(Dataset0[Feature_names], Dataset0["Y"])
         neigh1.fit(Dataset1[Feature_names], Dataset1["Y"])
         Dataset["Yk0"] = neigh0.predict(Dataset[Feature_names])
         Dataset["Yk1"] = neigh1.predict(Dataset[Feature_names])
-        Dataset0["Yk0"] = Dataset.loc[Dataset["W"] == 0, "Yk0"]
-        Dataset0["Yk1"] = Dataset.loc[Dataset["W"] == 0, "Yk1"]
-        Dataset1["Yk0"] = Dataset.loc[Dataset["W"] == 1, "Yk0"]
-        Dataset1["Yk1"] = Dataset.loc[Dataset["W"] == 1, "Yk1"]
-        # `````````````````````````````````````````````````````
+        Dataset0["Yk0"] = Dataset.loc[Dataset["T"] == 0, "Yk0"]
+        Dataset0["Yk1"] = Dataset.loc[Dataset["T"] == 0, "Yk1"]
+        Dataset1["Yk0"] = Dataset.loc[Dataset["T"] == 1, "Yk0"]
+        Dataset1["Yk1"] = Dataset.loc[Dataset["T"] == 1, "Yk1"]
+
         a0 = np.sqrt(np.mean((Dataset0["Y"] - np.mean(Dataset0["Y"])) ** 2))
         a1 = np.sqrt(np.mean((Dataset1["Y"] - np.mean(Dataset1["Y"])) ** 2))
         b0 = np.mean(
