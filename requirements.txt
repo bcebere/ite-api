@@ -1,4 +1,6 @@
 GPy
+jupyter
+jupyterlab
 matplotlib
 numpy
 pandas

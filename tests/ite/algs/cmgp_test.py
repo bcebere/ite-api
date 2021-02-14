@@ -37,7 +37,7 @@ def test_cmgp_short_training(
         model = alg.CMGP(
             dim=dim,
             dim_outcome=dim_outcome,
-            max_gp_iterations=100,
+            max_gp_iterations=50,
         )
         assert model is not None
 
