@@ -177,8 +177,9 @@ class CMGP:
     def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> dict:
         Hat_Y = self.predict(Test_X).to_numpy()
 
+        pehe = np_utils.sqrt_PEHE(Hat_Y, Test_Y)
         return {
-            "sqrt_PEHE": np_utils.sqrt_PEHE(Hat_Y, Test_Y),
+            "sqrt_PEHE": pehe,
             "ATE": np_utils.ATE(Hat_Y, Test_Y),
         }
 
