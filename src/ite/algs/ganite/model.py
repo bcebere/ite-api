@@ -9,6 +9,7 @@ import tensorflow.compat.v1 as tf
 from tqdm import tqdm
 
 # ite absolute
+from ite.utils.metrics import Metrics
 import ite.utils.tensorflow as tf_utils
 
 tf.disable_v2_behavior()
@@ -351,14 +352,12 @@ class Ganite:
             if it % self.test_step == 0:
                 metrics_for_step = self.test(Test_X, Test_Y)
 
-                metrics["ite_block"]["I_loss"].append(I_loss_curr)
-                metrics["ite_block"]["Loss_sqrt_PEHE"].append(
-                    metrics_for_step["sqrt_PEHE"]
-                )
-                metrics["ite_block"]["Loss_ATE"].append(metrics_for_step["ATE"])
+                Loss_sqrt_PEHE = metrics_for_step.sqrt_PEHE()
+                Loss_ATE = metrics_for_step.ATE()
 
-                Loss_sqrt_PEHE = metrics_for_step["sqrt_PEHE"]
-                Loss_ATE = metrics_for_step["ATE"]
+                metrics["ite_block"]["I_loss"].append(I_loss_curr)
+                metrics["ite_block"]["Loss_sqrt_PEHE"].append(Loss_sqrt_PEHE)
+                metrics["ite_block"]["Loss_ATE"].append(Loss_ATE)
 
                 print(f"Iter: {it}")
                 print(f"I_loss: {I_loss_curr:.4}")
@@ -372,16 +371,7 @@ class Ganite:
         Hat_curr = self.sess.run([self.Hat], feed_dict={self.X: Test_X})[0]
         return pd.DataFrame(Hat_curr, columns=["y_hat_0", "y_hat_1"])
 
-    def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> dict:
-        Loss_sqrt_PEHE = tf_utils.sqrt_PEHE(self.Y_T, self.Hat)
-        Loss_ATE = tf_utils.ATE(self.Y_T, self.Hat)
+    def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> Metrics:
+        y_hat = self.predict(Test_X)
 
-        sqrt_PEHE, ATE = self.sess.run(
-            [Loss_sqrt_PEHE, Loss_ATE],
-            feed_dict={self.X: Test_X, self.Y_T: Test_Y},
-        )
-
-        return {
-            "sqrt_PEHE": float(sqrt_PEHE),
-            "ATE": float(ATE),
-        }
+        return Metrics(y_hat.to_numpy(), Test_Y)

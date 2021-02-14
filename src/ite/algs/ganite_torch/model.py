@@ -273,7 +273,7 @@ class GaniteTorch:
 
     def predict(self, df_Test_X: pd.DataFrame) -> pd.DataFrame:
         Test_X = torch.from_numpy(df_Test_X).float()
-        y_hat = self.inference_nets(Test_X)
+        y_hat = self.inference_nets(Test_X).detach().numpy()
         return pd.DataFrame(y_hat, columns=["y_hat_0", "y_hat_1"])
 
     def test(self, df_Test_X: pd.DataFrame, df_Test_Y: pd.DataFrame) -> dict:

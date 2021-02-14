@@ -31,7 +31,6 @@ def test_sanity() -> None:
         (2, 2, 128, 5, 8),  # Optimal Hyper-parameters of GANITE(Table 7 in the paper)
     ],
 )
-@pytest.mark.xfail
 def test_ganite_short_training(
     plt: Any,
     iterations: int,
@@ -93,7 +92,4 @@ def test_ganite_short_training(
     assert predicted.shape == (Test_X.shape[0], 2)
 
     test_metrics = model.test(Test_X, Test_Y)
-    assert "sqrt_PEHE" in test_metrics
-    assert "ATE" in test_metrics
-
-    assert 0.28 < test_metrics["sqrt_PEHE"] and test_metrics["sqrt_PEHE"] < 0.31
+    assert 0.28 < test_metrics.sqrt_PEHE() and test_metrics.sqrt_PEHE() < 0.31
