@@ -4,15 +4,12 @@
 # stdlib
 from typing import Any
 from typing import Tuple
-import warnings
 
 # third party
 import GPy
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import KNeighborsRegressor
-
-warnings.filterwarnings("ignore")
 
 log_2_pi = np.log(2 * np.pi)
 
@@ -174,12 +171,6 @@ class CMGP:
 
         K0 = GPy.kern.RBF(self.dim, ARD=True)
         K1 = GPy.kern.RBF(self.dim, ARD=True)
-
-        # K0         = GPy.kern.MLP(self.dim, ARD=True)
-        # K1         = GPy.kern.MLP(self.dim, ARD=True)
-
-        # K0         = GPy.kern.Spline(input_dim=self.dim)
-        # K1         = GPy.kern.Spline(input_dim=self.dim)
 
         kernel_dict = {
             "CMGP": GPy.util.multioutput.LCM(

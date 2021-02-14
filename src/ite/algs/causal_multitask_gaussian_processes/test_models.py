@@ -17,13 +17,13 @@ from typing import Tuple
 # third party
 import initpath_alg
 from make_data import sample_IHDP
-from models.causal_models import CMGP
 import numpy as np
 import utilmlab
 
 # ite relative
 from ..utils.numpy import PEHE
 from ..utils.numpy import mean_confidence_interval
+from .model import CMGP
 
 initpath_alg.init_sys_path()
 

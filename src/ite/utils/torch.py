@@ -2,15 +2,21 @@
 import torch
 
 
+def squared_difference(input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    return (input - target) ** 2
+
+
 def sqrt_PEHE(y: torch.Tensor, hat_y: torch.Tensor) -> torch.Tensor:
     """
-    Precision in Estimation of Heterogeneous Effect(Tensorflow version).
+    Precision in Estimation of Heterogeneous Effect(PyTorch version).
     PEHE reflects the ability to capture individual variation in treatment effects.
     Args:
         y: expected outcome.
         hat_y: estimated outcome.
     """
-    return torch.sqrt(torch.mean((y.reshape((-1, 1)) - hat_y.reshape((-1, 1))) ** 2))
+    return torch.sqrt(
+        torch.mean(squared_difference((y[:, 1] - y[:, 0]), (hat_y[:, 1] - hat_y[:, 0])))
+    )
 
 
 def ATE(y: torch.Tensor, hat_y: torch.Tensor) -> torch.Tensor:

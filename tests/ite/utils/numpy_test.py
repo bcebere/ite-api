@@ -12,14 +12,15 @@ import ite
 @pytest.mark.parametrize(
     "y,y_hat,expected",
     [
-        ([[1, 1], [10, 10]], [[20, 10], [200, 100]], 5050),
-        ([[1, 2], [3, 4]], [[5, 16], [7, 18]], 100),
+        ([[1, 1], [10, 10]], [[20, 10], [200, 100]], np.sqrt(5050)),
+        ([[1, 2], [3, 4]], [[5, 16], [7, 18]], 10),
+        ([[1, 1], [1, 1]], [[0, 0], [0, 0]], 0),
     ],
 )
 def test_numpy_PEHE(y: Any, y_hat: Any, expected: float) -> None:
     mock_y = np.array(y)
     mock_y_hat = np.array(y_hat)
-    assert ite.utils.numpy.sqrt_PEHE(mock_y, mock_y_hat) > 0
+    assert ite.utils.numpy.sqrt_PEHE(mock_y, mock_y_hat) == expected
 
 
 @pytest.mark.parametrize(

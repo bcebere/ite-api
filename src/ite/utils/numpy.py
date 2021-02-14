@@ -9,7 +9,11 @@ import numpy as np
 from scipy import stats
 
 
-def sqrt_PEHE(T_true: np.ndarray, T_est: np.ndarray) -> float:
+def squared_difference(input: np.ndarray, target: np.ndarray) -> np.ndarray:
+    return (input - target) ** 2
+
+
+def sqrt_PEHE(y: np.ndarray, hat_y: np.ndarray) -> float:
     """
     Precision in Estimation of Heterogeneous Effect(Numpy version).
     PEHE reflects the ability to capture individual variation in treatment effects.
@@ -17,7 +21,9 @@ def sqrt_PEHE(T_true: np.ndarray, T_est: np.ndarray) -> float:
         y: expected outcome.
         hat_y: estimated outcome.
     """
-    return np.sqrt(np.mean((T_true.reshape((-1, 1)) - T_est.reshape((-1, 1))) ** 2))
+    return np.sqrt(
+        np.mean(squared_difference((y[:, 1] - y[:, 0]), (hat_y[:, 1] - hat_y[:, 0])))
+    )
 
 
 def RPol(t: np.ndarray, y: np.ndarray, hat_y: np.ndarray) -> np.ndarray:
