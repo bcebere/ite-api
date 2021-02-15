@@ -2,6 +2,9 @@
 GANITE:
 Jinsung Yoon 10/11/2017
 """
+# stdlib
+from typing import Tuple
+
 # third party
 import numpy as np
 import pandas as pd
@@ -166,11 +169,6 @@ class InferenceNets:
         return I_prob
 
 
-def sample_X(X: tf.Variable, size: int) -> int:
-    start_idx = np.random.randint(0, X.shape[0], size)
-    return start_idx
-
-
 class Ganite:
     def __init__(
         self,
@@ -285,6 +283,17 @@ class Ganite:
         # Metrics
         self.train_perf_metrics = HistoricMetrics()
 
+    def sample_minibatch(
+        self, X: tf.Variable, T: tf.Variable, Y: tf.Variable
+    ) -> Tuple[tf.Variable, tf.Variable, tf.Variable]:
+        idx_mb = np.random.randint(0, X.shape[0], self.minibatch_size)
+
+        X_mb = X[idx_mb, :]
+        T_mb = np.reshape(T[idx_mb], [self.minibatch_size, 1])
+        Y_mb = np.reshape(Y[idx_mb], [self.minibatch_size, 1])
+
+        return X_mb, T_mb, Y_mb
+
     def train(
         self,
         Train_X: pd.DataFrame,
@@ -297,20 +306,14 @@ class Ganite:
         # Train G and D first
         for it in tqdm(range(self.num_iterations)):
             for kk in range(self.num_discr_iterations):
-                idx_mb = sample_X(Train_X, self.minibatch_size)
-                X_mb = Train_X[idx_mb, :]
-                T_mb = np.reshape(Train_T[idx_mb], [self.minibatch_size, 1])
-                Y_mb = np.reshape(Train_Y[idx_mb], [self.minibatch_size, 1])
+                X_mb, T_mb, Y_mb = self.sample_minibatch(Train_X, Train_T, Train_Y)
 
                 _, D_loss_curr = self.sess.run(
                     [self.D_solver, self.D_loss],
                     feed_dict={self.X: X_mb, self.T: T_mb, self.Y: Y_mb},
                 )
 
-            idx_mb = sample_X(Train_X, self.minibatch_size)
-            X_mb = Train_X[idx_mb, :]
-            T_mb = np.reshape(Train_T[idx_mb], [self.minibatch_size, 1])
-            Y_mb = np.reshape(Train_Y[idx_mb], [self.minibatch_size, 1])
+            X_mb, T_mb, Y_mb = self.sample_minibatch(Train_X, Train_T, Train_Y)
 
             _, G_loss_curr, Tilde_curr = self.sess.run(
                 [self.G_solver, self.G_loss, self.Tilde],
@@ -329,11 +332,7 @@ class Ganite:
 
         # Train I and ID
         for it in tqdm(range(self.num_iterations)):
-
-            idx_mb = sample_X(Train_X, self.minibatch_size)
-            X_mb = Train_X[idx_mb, :]
-            T_mb = np.reshape(Train_T[idx_mb], [self.minibatch_size, 1])
-            Y_mb = np.reshape(Train_Y[idx_mb], [self.minibatch_size, 1])
+            X_mb, T_mb, Y_mb = self.sample_minibatch(Train_X, Train_T, Train_Y)
 
             _, I_loss_curr = self.sess.run(
                 [self.I_solver, self.I_loss],

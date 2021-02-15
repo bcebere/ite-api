@@ -1,3 +1,6 @@
+# stdlib
+from typing import Tuple
+
 # third party
 import numpy as np
 import pandas as pd
@@ -99,11 +102,6 @@ class InferenceNets(nn.Module):
         return torch.sigmoid(torch.cat([I_prob1, I_prob2], dim=1))
 
 
-def sample_X(X: torch.Tensor, size: int) -> int:
-    start_idx = np.random.randint(0, X.shape[0], size)
-    return start_idx
-
-
 class GaniteTorch:
     def __init__(
         self,
@@ -142,6 +140,17 @@ class GaniteTorch:
         # Metrics
         self.train_perf_metrics = HistoricMetrics()
 
+    def sample_minibatch(
+        self, X: torch.Tensor, T: torch.tensor, Y: torch.Tensor
+    ) -> Tuple[torch.tensor, torch.tensor, torch.tensor]:
+        idx_mb = np.random.randint(0, X.shape[0], self.minibatch_size)
+
+        X_mb = X[idx_mb, :]
+        T_mb = T[idx_mb].reshape([self.minibatch_size, 1])
+        Y_mb = Y[idx_mb].reshape([self.minibatch_size, 1])
+
+        return X_mb, T_mb, Y_mb
+
     def train(
         self,
         df_Train_X: pd.DataFrame,
@@ -168,10 +177,7 @@ class GaniteTorch:
             for kk in range(self.num_discr_iterations):
                 self.D_solver.zero_grad()
 
-                idx_mb = sample_X(Train_X, self.minibatch_size)
-                X_mb = Train_X[idx_mb, :]
-                T_mb = Train_T[idx_mb].reshape([self.minibatch_size, 1])
-                Y_mb = Train_Y[idx_mb].reshape([self.minibatch_size, 1])
+                X_mb, T_mb, Y_mb = self.sample_minibatch(Train_X, Train_T, Train_Y)
 
                 Tilde = self.counterfactual_generator(X_mb, T_mb, Y_mb)
                 D_out = self.counterfactual_discriminator(X_mb, T_mb, Y_mb, Tilde)
@@ -181,10 +187,7 @@ class GaniteTorch:
                 D_loss.backward(retain_graph=True)
                 self.D_solver.step()
 
-            idx_mb = sample_X(Train_X, self.minibatch_size)
-            X_mb = Train_X[idx_mb, :]
-            T_mb = Train_T[idx_mb].reshape([self.minibatch_size, 1])
-            Y_mb = Train_Y[idx_mb].reshape([self.minibatch_size, 1])
+            X_mb, T_mb, Y_mb = self.sample_minibatch(Train_X, Train_T, Train_Y)
 
             Tilde = self.counterfactual_generator(X_mb, T_mb, Y_mb)
             D_out = self.counterfactual_discriminator(X_mb, T_mb, Y_mb, Tilde)
@@ -218,10 +221,7 @@ class GaniteTorch:
         for it in tqdm(range(self.num_iterations)):
             self.I_solver.zero_grad()
 
-            idx_mb = sample_X(Train_X, self.minibatch_size)
-            X_mb = Train_X[idx_mb, :]
-            T_mb = Train_T[idx_mb].reshape([self.minibatch_size, 1])
-            Y_mb = Train_Y[idx_mb].reshape([self.minibatch_size, 1])
+            X_mb, T_mb, Y_mb = self.sample_minibatch(Train_X, Train_T, Train_Y)
 
             Tilde = self.counterfactual_generator(X_mb, T_mb, Y_mb)
 
