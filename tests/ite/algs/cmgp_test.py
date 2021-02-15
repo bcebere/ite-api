@@ -38,7 +38,6 @@ def test_cmgp_short_training(
             downsample=1000,
         )
 
-        # metrics = model.train(Train_X, Train_T, Train_Y, Opt_Train_Y ,Test_X, Test_Y)
         metrics = model.train(*dataset)
 
         test_metrics = model.test(Test_X, Test_Y)

@@ -22,8 +22,8 @@ class Metrics:
         return utils.ATE(self.estimated, self.actual)
 
     def print(self) -> None:
-        print(f"sqrt_PHE = {0:.3f}".format(self.sqrt_PEHE()))
-        print(f"ATE = {0:.3f}".format(self.ATE()))
+        print(f"sqrt_PHE = {self.sqrt_PEHE():.3f}")
+        print(f"ATE = {self.ATE():.3f}")
 
 
 class HistoricMetrics:
@@ -83,4 +83,3 @@ class HistoricMetrics:
                         alpha=0.2,
                     )
             axs[idx].legend()
-        # fig.subplots_adjust(hspace=0.001)
