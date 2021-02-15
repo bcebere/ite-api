@@ -299,6 +299,7 @@ class Ganite:
         Train_X: pd.DataFrame,
         Train_T: pd.DataFrame,
         Train_Y: pd.DataFrame,
+        Opt_Train_Y: pd.DataFrame,
         Test_X: pd.DataFrame,
         Test_Y: pd.DataFrame,
     ) -> HistoricMetrics:
@@ -322,13 +323,11 @@ class Ganite:
 
             # Testing
             if it % self.test_step == 0:
-                metric_block = "gen_block"
+                metric_block = "Counterfactual Block"
                 self.train_perf_metrics.add(
-                    "Cf Discriminator loss", D_loss_curr, metric_block
+                    "Discriminator loss", D_loss_curr, metric_block
                 )
-                self.train_perf_metrics.add(
-                    "Cf Generator loss", G_loss_curr, metric_block
-                )
+                self.train_perf_metrics.add("Generator loss", G_loss_curr, metric_block)
 
         # Train I and ID
         for it in tqdm(range(self.num_iterations)):
@@ -341,16 +340,24 @@ class Ganite:
 
             # Testing
             if it % self.test_step == 0:
-                metric_block = "ite_block"
+                metric_block = "ITE Block"
+                self.train_perf_metrics.add("Loss", I_loss_curr, metric_block)
+
+                metric_block = "ITE Block in-sample metrics"
+                metrics_for_step = self.test(Train_X, Opt_Train_Y)
+
+                self.train_perf_metrics.add(
+                    "sqrt_PEHE", metrics_for_step.sqrt_PEHE(), metric_block
+                )
+                self.train_perf_metrics.add("ATE", metrics_for_step.ATE(), metric_block)
+
+                metric_block = "ITE Block out-sample metrics"
                 metrics_for_step = self.test(Test_X, Test_Y)
 
-                self.train_perf_metrics.add("ITE loss", I_loss_curr, metric_block)
                 self.train_perf_metrics.add(
-                    "Loss_sqrt_PEHE", metrics_for_step.sqrt_PEHE(), metric_block
+                    "sqrt_PEHE", metrics_for_step.sqrt_PEHE(), metric_block
                 )
-                self.train_perf_metrics.add(
-                    "Loss_ATE", metrics_for_step.ATE(), metric_block
-                )
+                self.train_perf_metrics.add("ATE", metrics_for_step.ATE(), metric_block)
 
         return self.train_perf_metrics
 

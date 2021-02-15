@@ -31,7 +31,7 @@ def test_cmgp_short_training(
     )
     assert model is not None
 
-    for experiment in range(3):
+    for experiment in range(8):
         dataset = ds.load(
             "twins",
             train_ratio,
@@ -44,7 +44,7 @@ def test_cmgp_short_training(
         test_metrics = model.test(Test_X, Test_Y)
         assert 0.2 < test_metrics.sqrt_PEHE() and test_metrics.sqrt_PEHE() < 0.4
 
-    metrics.plot(plt, with_ci=True)
+    metrics.print()
     try:
         metrics.plot(plt, with_ci=True, thresholds=[0.2, 0.25, 0.3, 0.35])
     except BaseException as e:

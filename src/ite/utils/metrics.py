@@ -4,7 +4,6 @@ from typing import List
 from typing import Tuple
 
 # third party
-from matplotlib.ticker import MultipleLocator
 import numpy as np
 
 # ite absolute
@@ -23,8 +22,8 @@ class Metrics:
         return utils.ATE(self.estimated, self.actual)
 
     def print(self) -> None:
-        print(f"sqrt_PHE = {self.sqrt_PEHE()}")
-        print(f"ATE = {self.ATE()}")
+        print(f"sqrt_PHE = {0:.3f}".format(self.sqrt_PEHE()))
+        print(f"ATE = {0:.3f}".format(self.ATE()))
 
 
 class HistoricMetrics:
@@ -48,13 +47,19 @@ class HistoricMetrics:
         ]
         return utils.mean_confidence_interval(cache_np)
 
+    def print(self) -> None:
+        for group in self.cache:
+            print(f"{group}:")
+            for metric in self.cache[group]:
+                ci = self.mean_confidence_interval(metric, group)
+                print(f" - {metric}: {ci[0]:.3f} +/- {ci[1]:.3f}")
+
     def plot(
         self, plt: Any, with_ci: bool = False, thresholds: List[float] = []
     ) -> None:
         fig, axs = plt.subplots(len(self.cache.keys()))
+        fig.set_size_inches(15, 5.5 * len(self.cache.keys()))
         for idx, group in enumerate(list(self.cache.keys())):
-            axs[idx].yaxis.set_major_locator(MultipleLocator(0.05))
-
             for metric in self.cache[group]:
                 for thresh in thresholds:
                     axs[idx].hlines(
@@ -62,6 +67,7 @@ class HistoricMetrics:
                         xmin=0,
                         xmax=len(self.cache[group][metric]) - 1,
                         linestyles="dotted",
+                        colors="r",
                     )
                 break
 
@@ -77,3 +83,4 @@ class HistoricMetrics:
                         alpha=0.2,
                     )
             axs[idx].legend()
+        # fig.subplots_adjust(hspace=0.001)

@@ -43,9 +43,9 @@ def test_ganite_torch_short_training(
 ) -> None:
     train_ratio = 0.8
 
-    [Train_X, Train_T, Train_Y, Opt_Train_Y, Test_X, Test_Y] = ds.load(
-        "twins", train_ratio
-    )
+    dataset = ds.load("twins", train_ratio)
+
+    [Train_X, Train_T, Train_Y, Opt_Train_Y, Test_X, Test_Y] = dataset
 
     dim = len(Train_X[0])
     dim_hidden = dim if dim_hidden == 0 else dim_hidden
@@ -64,10 +64,10 @@ def test_ganite_torch_short_training(
     )
     assert model is not None
 
-    outsample_metrics = model.train(Train_X, Train_T, Train_Y, Test_X, Test_Y)
+    metrics = model.train(*dataset)
 
     try:
-        outsample_metrics.plot(plt)
+        metrics.plot(plt, thresholds=[0.2, 0.25, 0.3, 0.35])
     except BaseException as e:
         print("failed to plot(maybe rerun with --plots):", e)
 
@@ -76,4 +76,4 @@ def test_ganite_torch_short_training(
     assert predicted.shape == (Test_X.shape[0], 2)
 
     test_metrics = model.test(Test_X, Test_Y)
-    assert 0.2 < test_metrics.sqrt_PEHE() and test_metrics.sqrt_PEHE() < 0.31
+    assert 0.2 < test_metrics.sqrt_PEHE() and test_metrics.sqrt_PEHE() < 0.4

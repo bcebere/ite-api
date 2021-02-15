@@ -156,12 +156,14 @@ class GaniteTorch:
         df_Train_X: pd.DataFrame,
         df_Train_T: pd.DataFrame,
         df_Train_Y: pd.DataFrame,
+        df_Opt_Train_Y: pd.DataFrame,
         df_Test_X: pd.DataFrame,
         df_Test_Y: pd.DataFrame,
     ) -> HistoricMetrics:
         Train_X = torch.from_numpy(df_Train_X).float()
         Train_T = torch.from_numpy(df_Train_T).float()
         Train_Y = torch.from_numpy(df_Train_Y).float()
+        Opt_Train_Y = torch.from_numpy(df_Opt_Train_Y).float()
         Test_X = torch.from_numpy(df_Test_X).float()
         Test_Y = torch.from_numpy(df_Test_Y).float()
 
@@ -209,12 +211,12 @@ class GaniteTorch:
 
             # Testing
             if it % self.test_step == 0:
-                metric_block = "gen_block"
+                metric_block = "Counterfactual Block"
                 self.train_perf_metrics.add(
-                    "Cf Discriminator loss", D_loss.detach().numpy(), metric_block
+                    "Discriminator loss", D_loss.detach().numpy(), metric_block
                 )
                 self.train_perf_metrics.add(
-                    "Cf Generator loss", G_loss.detach().numpy(), metric_block
+                    "Generator loss", G_loss.detach().numpy(), metric_block
                 )
 
         # Train I and ID
@@ -245,18 +247,26 @@ class GaniteTorch:
 
             # Testing
             if it % self.test_step == 0:
-                metric_block = "ite_block"
-                metrics_for_step = self.test(Test_X.numpy(), Test_Y.numpy())
-
+                metric_block = "ITE Block"
                 self.train_perf_metrics.add(
                     "ITE loss", I_loss.detach().numpy(), metric_block
                 )
+
+                metric_block = "ITE Block in-sample metrics"
+                metrics_for_step = self.test(Train_X.numpy(), Opt_Train_Y.numpy())
+
                 self.train_perf_metrics.add(
-                    "Loss_sqrt_PEHE", metrics_for_step.sqrt_PEHE(), metric_block
+                    "sqrt_PEHE", metrics_for_step.sqrt_PEHE(), metric_block
                 )
+                self.train_perf_metrics.add("ATE", metrics_for_step.ATE(), metric_block)
+
+                metric_block = "ITE Block out-sample metrics"
+                metrics_for_step = self.test(Test_X.numpy(), Test_Y.numpy())
+
                 self.train_perf_metrics.add(
-                    "Loss_ATE", metrics_for_step.ATE(), metric_block
+                    "sqrt_PEHE", metrics_for_step.sqrt_PEHE(), metric_block
                 )
+                self.train_perf_metrics.add("ATE", metrics_for_step.ATE(), metric_block)
 
         return self.train_perf_metrics
 
