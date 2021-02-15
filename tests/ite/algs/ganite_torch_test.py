@@ -66,6 +66,8 @@ def test_ganite_torch_short_training(
 
     metrics = model.train(*dataset)
 
+    metrics.print()
+
     try:
         metrics.plot(plt, thresholds=[0.2, 0.25, 0.3, 0.35])
     except BaseException as e:
@@ -76,4 +78,8 @@ def test_ganite_torch_short_training(
     assert predicted.shape == (Test_X.shape[0], 2)
 
     test_metrics = model.test(Test_X, Test_Y)
+    test_metrics.print()
+
+    print("Top 5 worst errors ", Test_X[test_metrics.worst_mistakes()])
+
     assert 0.2 < test_metrics.sqrt_PEHE() and test_metrics.sqrt_PEHE() < 0.4

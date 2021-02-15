@@ -16,14 +16,22 @@ class Metrics:
         self.actual = actual
 
     def sqrt_PEHE(self) -> float:
-        return utils.sqrt_PEHE(self.estimated, self.actual)
+        return utils.sqrt_PEHE(self.actual, self.estimated)
 
     def ATE(self) -> float:
-        return utils.ATE(self.estimated, self.actual)
+        return utils.ATE(self.actual, self.estimated)
+
+    def worst_mistakes(self, top_k: int = 5) -> List[int]:
+        sq_diff = utils.squared_difference(
+            (self.actual[:, 1] - self.actual[:, 0]),
+            (self.estimated[:, 1] - self.estimated[:, 0]),
+        )
+        return sq_diff.argsort()[-top_k:][::-1]
 
     def print(self) -> None:
         print(f"sqrt_PHE = {self.sqrt_PEHE():.3f}")
         print(f"ATE = {self.ATE():.3f}")
+        print(f"Top 5 worst mistakes(indices) = {self.worst_mistakes()}")
 
 
 class HistoricMetrics:
