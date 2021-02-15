@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
 # stdlib
 import os
+from typing import Any
+import warnings
 
 # third party
 from pkg_resources import DistributionNotFound
 from pkg_resources import get_distribution
+
+
+def warn(*args: Any, **kwargs: Any) -> None:
+    pass
+
+
+warnings.warn = warn
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 # ite absolute

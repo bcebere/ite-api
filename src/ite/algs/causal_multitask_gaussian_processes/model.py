@@ -205,8 +205,8 @@ class CMGP:
         else:
             Feature_names = [0]
 
-        Dataset0 = Dataset[Dataset["T"] == 0]
-        Dataset1 = Dataset[Dataset["T"] == 1]
+        Dataset0 = Dataset[Dataset["T"] == 0].copy()
+        Dataset1 = Dataset[Dataset["T"] == 1].copy()
         neigh0 = KNeighborsRegressor(n_neighbors=10)
         neigh1 = KNeighborsRegressor(n_neighbors=10)
         neigh0.fit(Dataset0[Feature_names], Dataset0["Y"])
