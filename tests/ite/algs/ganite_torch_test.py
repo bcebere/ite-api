@@ -16,7 +16,7 @@ def test_sanity() -> None:
 @pytest.mark.parametrize(
     "iterations",
     [
-        10000,
+        1000,
     ],
 )
 @pytest.mark.parametrize(
@@ -66,24 +66,8 @@ def test_ganite_torch_short_training(
 
     metrics = model.train(Train_X, Train_T, Train_Y, Test_X, Test_Y)
 
-    assert "gen_block" in metrics
-    assert "D_loss" in metrics["gen_block"]
-    assert "G_loss" in metrics["gen_block"]
-
-    assert "ite_block" in metrics
-    assert "I_loss" in metrics["ite_block"]
-    assert "Loss_sqrt_PEHE" in metrics["ite_block"]
-    assert "Loss_ATE" in metrics["ite_block"]
-
     try:
-        fig, axs = plt.subplots(2)
-        axs[0].plot(metrics["gen_block"]["D_loss"], label="Cf Discriminator loss")
-        axs[0].plot(metrics["gen_block"]["G_loss"], label="Cf Generator loss")
-        axs[0].legend()
-        axs[1].plot(metrics["ite_block"]["I_loss"], label="ITE loss")
-        axs[1].plot(metrics["ite_block"]["Loss_sqrt_PEHE"], label="Loss_PEHE")
-        axs[1].plot(metrics["ite_block"]["Loss_ATE"], label="Loss_ATE")
-        axs[1].legend()
+        metrics.plot(plt)
     except BaseException as e:
         print("failed to plot(maybe rerun with --plots):", e)
 

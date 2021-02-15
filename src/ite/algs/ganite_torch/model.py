@@ -6,6 +6,7 @@ from torch import nn
 from tqdm import tqdm
 
 # ite absolute
+from ite.utils.metrics import HistoricMetrics
 from ite.utils.metrics import Metrics
 import ite.utils.torch as torch_utils
 
@@ -113,9 +114,9 @@ class GaniteTorch:
         beta: float = 1,
         minibatch_size: int = 256,
         depth: int = 1,
-        num_iterations: int = 10000,
-        test_step: int = 200,
-        num_discr_iterations: int = 10,
+        num_iterations: int = 1000,
+        test_step: int = 50,
+        num_discr_iterations: int = 5,
     ) -> None:
         # Hyperparameters
         self.minibatch_size = minibatch_size
@@ -138,6 +139,9 @@ class GaniteTorch:
         self.D_solver = torch.optim.Adam(self.counterfactual_discriminator.parameters())
         self.I_solver = torch.optim.Adam(self.inference_nets.parameters())
 
+        # Metrics
+        self.train_perf_metrics = HistoricMetrics()
+
     def train(
         self,
         df_Train_X: pd.DataFrame,
@@ -145,19 +149,7 @@ class GaniteTorch:
         df_Train_Y: pd.DataFrame,
         df_Test_X: pd.DataFrame,
         df_Test_Y: pd.DataFrame,
-    ) -> dict:
-        metrics: dict = {
-            "gen_block": {
-                "D_loss": [],
-                "G_loss": [],
-            },
-            "ite_block": {
-                "I_loss": [],
-                "Loss_sqrt_PEHE": [],
-                "Loss_ATE": [],
-            },
-        }
-
+    ) -> HistoricMetrics:
         Train_X = torch.from_numpy(df_Train_X).float()
         Train_T = torch.from_numpy(df_Train_T).float()
         Train_Y = torch.from_numpy(df_Train_Y).float()
@@ -214,13 +206,13 @@ class GaniteTorch:
 
             # Testing
             if it % self.test_step == 0:
-                metrics["gen_block"]["D_loss"].append(D_loss)
-                metrics["gen_block"]["G_loss"].append(G_loss)
-
-                print(f"Iter: {it}")
-                print(f"D_loss: {D_loss:.4}")
-                print(f"G_loss: {G_loss:.4}")
-                print()
+                metric_block = "gen_block"
+                self.train_perf_metrics.add(
+                    "Cf Discriminator loss", D_loss.detach().numpy(), metric_block
+                )
+                self.train_perf_metrics.add(
+                    "Cf Generator loss", G_loss.detach().numpy(), metric_block
+                )
 
         # Train I and ID
         for it in tqdm(range(self.num_iterations)):
@@ -253,26 +245,29 @@ class GaniteTorch:
 
             # Testing
             if it % self.test_step == 0:
+                metric_block = "ite_block"
                 metrics_for_step = self.test(Test_X.numpy(), Test_Y.numpy())
 
-                Loss_sqrt_PEHE = metrics_for_step.sqrt_PEHE()
-                Loss_ATE = metrics_for_step.ATE()
+                self.train_perf_metrics.add(
+                    "ITE loss", I_loss.detach().numpy(), metric_block
+                )
+                self.train_perf_metrics.add(
+                    "Loss_sqrt_PEHE", metrics_for_step.sqrt_PEHE(), metric_block
+                )
+                self.train_perf_metrics.add(
+                    "Loss_ATE", metrics_for_step.ATE(), metric_block
+                )
 
-                metrics["ite_block"]["I_loss"].append(I_loss)
-                metrics["ite_block"]["Loss_sqrt_PEHE"].append(Loss_sqrt_PEHE)
-                metrics["ite_block"]["Loss_ATE"].append(Loss_ATE)
+        return self.train_perf_metrics
 
-                print(f"Iter: {it}")
-                print(f"I_loss: {I_loss:.4}")
-                print(f"Loss_sqrt_PEHE_Out: {Loss_sqrt_PEHE:.4}")
-                print(f"Loss_ATE_Out: {Loss_ATE:.4}")
-                print("")
-
-        return metrics
+    def train_metrics(self) -> HistoricMetrics:
+        return self.train_perf_metrics
 
     def predict(self, df_Test_X: pd.DataFrame) -> pd.DataFrame:
-        Test_X = torch.from_numpy(df_Test_X).float()
-        y_hat = self.inference_nets(Test_X).detach().numpy()
+        with torch.no_grad():
+            Test_X = torch.from_numpy(df_Test_X).float()
+            y_hat = self.inference_nets(Test_X).detach().numpy()
+
         return pd.DataFrame(y_hat, columns=["y_hat_0", "y_hat_1"])
 
     def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> Metrics:

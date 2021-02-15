@@ -9,6 +9,7 @@ import tensorflow.compat.v1 as tf
 from tqdm import tqdm
 
 # ite absolute
+from ite.utils.metrics import HistoricMetrics
 from ite.utils.metrics import Metrics
 import ite.utils.tensorflow as tf_utils
 
@@ -281,6 +282,9 @@ class Ganite:
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
 
+        # Metrics
+        self.train_perf_metrics = HistoricMetrics()
+
     def train(
         self,
         Train_X: pd.DataFrame,
@@ -288,19 +292,7 @@ class Ganite:
         Train_Y: pd.DataFrame,
         Test_X: pd.DataFrame,
         Test_Y: pd.DataFrame,
-    ) -> dict:
-        metrics: dict = {
-            "gen_block": {
-                "D_loss": [],
-                "G_loss": [],
-            },
-            "ite_block": {
-                "I_loss": [],
-                "Loss_sqrt_PEHE": [],
-                "Loss_ATE": [],
-            },
-        }
-
+    ) -> HistoricMetrics:
         # Iterations
         # Train G and D first
         for it in tqdm(range(self.num_iterations)):
@@ -327,13 +319,13 @@ class Ganite:
 
             # Testing
             if it % self.test_step == 0:
-                metrics["gen_block"]["D_loss"].append(D_loss_curr)
-                metrics["gen_block"]["G_loss"].append(G_loss_curr)
-
-                print(f"Iter: {it}")
-                print(f"D_loss: {D_loss_curr:.4}")
-                print(f"G_loss: {G_loss_curr:.4}")
-                print()
+                metric_block = "gen_block"
+                self.train_perf_metrics.add(
+                    "Cf Discriminator loss", D_loss_curr, metric_block
+                )
+                self.train_perf_metrics.add(
+                    "Cf Generator loss", G_loss_curr, metric_block
+                )
 
         # Train I and ID
         for it in tqdm(range(self.num_iterations)):
@@ -350,22 +342,21 @@ class Ganite:
 
             # Testing
             if it % self.test_step == 0:
+                metric_block = "ite_block"
                 metrics_for_step = self.test(Test_X, Test_Y)
 
-                Loss_sqrt_PEHE = metrics_for_step.sqrt_PEHE()
-                Loss_ATE = metrics_for_step.ATE()
+                self.train_perf_metrics.add("ITE loss", I_loss_curr, metric_block)
+                self.train_perf_metrics.add(
+                    "Loss_sqrt_PEHE", metrics_for_step.sqrt_PEHE(), metric_block
+                )
+                self.train_perf_metrics.add(
+                    "Loss_ATE", metrics_for_step.ATE(), metric_block
+                )
 
-                metrics["ite_block"]["I_loss"].append(I_loss_curr)
-                metrics["ite_block"]["Loss_sqrt_PEHE"].append(Loss_sqrt_PEHE)
-                metrics["ite_block"]["Loss_ATE"].append(Loss_ATE)
+        return self.train_perf_metrics
 
-                print(f"Iter: {it}")
-                print(f"I_loss: {I_loss_curr:.4}")
-                print(f"Loss_sqrt_PEHE_Out: {Loss_sqrt_PEHE:.4}")
-                print(f"Loss_ATE_Out: {Loss_ATE:.4}")
-                print("")
-
-        return metrics
+    def train_metrics(self) -> HistoricMetrics:
+        return self.train_perf_metrics
 
     def predict(self, Test_X: pd.DataFrame) -> pd.DataFrame:
         Hat_curr = self.sess.run([self.Hat], feed_dict={self.X: Test_X})[0]
