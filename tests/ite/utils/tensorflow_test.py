@@ -10,6 +10,15 @@ import tensorflow.compat.v1 as tf
 import ite
 
 
+@pytest.fixture(scope="function")
+def session() -> tf.Session:
+    sess = tf.InteractiveSession()  # noqa: F401, F841
+
+    yield sess
+
+    sess.close()
+
+
 @pytest.mark.parametrize(
     "y,y_hat,expected",
     [
@@ -18,8 +27,9 @@ import ite
         ([[1, 1], [1, 1]], [[0, 0], [0, 0]], 0),
     ],
 )
-def test_tensorflow_PEHE(y: Any, y_hat: Any, expected: float) -> None:
-    sess = tf.InteractiveSession()  # noqa: F401, F841
+def test_tensorflow_PEHE(
+    y: Any, y_hat: Any, expected: float, session: tf.Session
+) -> None:
     mock_y = tf.convert_to_tensor(y)
     mock_y_hat = tf.convert_to_tensor(y_hat)
 
@@ -34,9 +44,9 @@ def test_tensorflow_PEHE(y: Any, y_hat: Any, expected: float) -> None:
         ([[1, 1], [1, 1]], [[0, 0], [0, 0]], 0),
     ],
 )
-def test_tensorflow_ATE(y: Any, y_hat: Any, expected: float) -> None:
-    sess = tf.InteractiveSession()  # noqa: F401, F841
-
+def test_tensorflow_ATE(
+    y: Any, y_hat: Any, expected: float, session: tf.Session
+) -> None:
     mock_y = tf.convert_to_tensor(y)
     mock_y_hat = tf.convert_to_tensor(y_hat)
     assert ite.utils.tensorflow.ATE(mock_y, mock_y_hat).eval() == expected

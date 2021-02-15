@@ -92,4 +92,4 @@ def test_ganite_short_training(
     assert predicted.shape == (Test_X.shape[0], 2)
 
     test_metrics = model.test(Test_X, Test_Y)
-    assert 0.28 < test_metrics.sqrt_PEHE() and test_metrics.sqrt_PEHE() < 0.31
+    assert 0.2 < test_metrics.sqrt_PEHE() and test_metrics.sqrt_PEHE() < 0.31

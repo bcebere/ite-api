@@ -276,6 +276,6 @@ class GaniteTorch:
         return pd.DataFrame(y_hat, columns=["y_hat_0", "y_hat_1"])
 
     def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> Metrics:
-        hat = self.inference_nets(Test_X)
+        hat = self.predict(Test_X)
 
         return Metrics(hat.to_numpy(), Test_Y)

@@ -1,4 +1,5 @@
 # stdlib
+from typing import Any
 from typing import Tuple
 
 # third party
@@ -19,5 +20,18 @@ class Metrics:
     def ATE(self) -> float:
         return utils.ATE(self.estimated, self.actual)
 
-    def mean_confidence_interval(self) -> Tuple[float, float]:
-        return utils.mean_confidence_interval(self.estimated, self.actual)
+
+class HistoricMetrics:
+    def __init__(self) -> None:
+        self.cache: dict = {}
+
+    def add(self, key: str, val: float) -> None:
+        if key not in self.cache:
+            self.cache[key] = []
+        self.cache[key].append(val)
+
+    def mean_confidence_interval(self, key: str) -> Tuple[float, float]:
+        return utils.mean_confidence_interval(self.cache[key])
+
+    def plot(self, plt: Any) -> None:
+        pass
