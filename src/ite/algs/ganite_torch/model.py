@@ -15,6 +15,12 @@ import ite.utils.torch as torch_utils
 
 
 class CounterfactualGenerator(nn.Module):
+    """
+    The counterfactual generator, G, uses the feature vector x,
+    the treatment vector t, and the factual outcome yf, to generate
+    a potential outcome vector, hat_y.
+    """
+
     def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
         super(CounterfactualGenerator, self).__init__()
         # Generator Layer
@@ -51,6 +57,12 @@ class CounterfactualGenerator(nn.Module):
 
 
 class CounterfactualDiscriminator(nn.Module):
+    """
+    The discriminator maps pairs (x, hat_y) to vectors in [0, 1]^2
+    representing probabilities that the i-th component of hat_y
+    is the factual outcome.
+    """
+
     def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
         super(CounterfactualDiscriminator, self).__init__()
         self.model = nn.Sequential(
@@ -73,6 +85,10 @@ class CounterfactualDiscriminator(nn.Module):
 
 
 class InferenceNets(nn.Module):
+    """
+    The ITE generator uses only the feature vector, x, to generate a potential outcome vector hat_y.
+    """
+
     def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
         super(InferenceNets, self).__init__()
         self.common = nn.Sequential(
@@ -103,6 +119,13 @@ class InferenceNets(nn.Module):
 
 
 class GaniteTorch:
+    """
+    The GANITE framework generates potential outcomes for a given feature vector x.
+    It consists of 2 components:
+     - The Counterfactual Generator block(generator + discriminator)
+     - The ITE block(InferenceNets).
+    """
+
     def __init__(
         self,
         dim: int,

@@ -2,8 +2,11 @@
 import torch
 
 
-def squared_difference(input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-    return (input - target) ** 2
+def squared_difference(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    """
+    Compute (x - y)(x - y) element-wise.
+    """
+    return (x - y) ** 2
 
 
 def sqrt_PEHE(y: torch.Tensor, hat_y: torch.Tensor) -> torch.Tensor:

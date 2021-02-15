@@ -15,7 +15,6 @@ from ite.utils.metrics import Metrics
 class CMGP:
     """
     An implementation of various Gaussian models for Causal inference building on GPy.
-
     """
 
     def __init__(
@@ -182,6 +181,9 @@ class CMGP:
         return result
 
     def test(self, Test_X: pd.DataFrame, Test_Y: pd.DataFrame) -> Metrics:
+        """
+        Infers the treatment effect for a certain set of input covariates and generate metrics, compared to a reference.
+        """
         Hat_Y = self.predict(Test_X).to_numpy()
         return Metrics(Hat_Y, Test_Y)
 

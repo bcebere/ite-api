@@ -20,6 +20,12 @@ tf.disable_v2_behavior()
 
 
 class CounterfactualGenerator:
+    """
+    The counterfactual generator, G, uses the feature vector x,
+    the treatment vector t, and the factual outcome yf, to generate
+    a potential outcome vector, hat_y.
+    """
+
     def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
         # Generator Layer
         self.G_W1 = tf.Variable(
@@ -82,6 +88,12 @@ class CounterfactualGenerator:
 
 
 class CounterfactualDiscriminator:
+    """
+    The discriminator maps pairs (x, hat_y) to vectors in [0, 1]^2
+    representing probabilities that the i-th component of hat_y
+    is the factual outcome.
+    """
+
     def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
         self.D_W1 = tf.Variable(
             tf_utils.xavier_init([(Dim + 2), DimHidden])
@@ -120,6 +132,10 @@ class CounterfactualDiscriminator:
 
 
 class InferenceNets:
+    """
+    The ITE generator uses only the feature vector, x, to generate a potential outcome vector hat_y.
+    """
+
     def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
         self.I_W1 = tf.Variable(tf_utils.xavier_init([(Dim), DimHidden]))
         self.I_b1 = tf.Variable(tf.zeros(shape=[DimHidden]))
@@ -170,6 +186,13 @@ class InferenceNets:
 
 
 class Ganite:
+    """
+    The GANITE framework generates potential outcomes for a given feature vector x.
+    It consists of 2 components:
+     - The Counterfactual Generator block(generator + discriminator).
+     - The ITE block(InferenceNets).
+    """
+
     def __init__(
         self,
         dim: int,

@@ -18,6 +18,7 @@ URL = "https://bitbucket.org/mvdschaar/mlforhealthlabpub/raw/0b0190bcd38a76c405c
 
 def preprocess(fn_csv: Path) -> List[np.ndarray]:
     """
+    Load the dataset and preprocess it.
     Input:
         fn_csv: Path to the input CSV to load
     Outputs:
@@ -90,6 +91,7 @@ def train_test_split(
     downsample: Optional[int] = None,
 ) -> List[np.ndarray]:
     """
+    Split the dataset for train and test.
     Input:
         X: Feature Vector
         T: Treatment Vector
@@ -133,6 +135,12 @@ def train_test_split(
 def load(
     data_path: Path, train_split: float = 0.8, downsample: Optional[int] = None
 ) -> List[np.ndarray]:
+    """
+    Download the dataset if needed.
+    Load the dataset.
+    Preprocess the data.
+    Return train/test split.
+    """
     csv = data_path / DATASET
 
     download_if_needed(csv, URL)

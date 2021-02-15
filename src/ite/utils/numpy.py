@@ -9,8 +9,11 @@ import numpy as np
 from scipy import stats
 
 
-def squared_difference(input: np.ndarray, target: np.ndarray) -> np.ndarray:
-    return (input - target) ** 2
+def squared_difference(x: np.ndarray, y: np.ndarray) -> np.ndarray:
+    """
+    Compute (x - y)(x - y) element-wise.
+    """
+    return (x - y) ** 2
 
 
 def sqrt_PEHE(y: np.ndarray, hat_y: np.ndarray) -> float:
