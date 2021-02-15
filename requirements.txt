@@ -12,6 +12,7 @@ pytest-plt
 scipy
 setuptools
 sklearn
+tabulate
 tensorflow
 torch
 tqdm

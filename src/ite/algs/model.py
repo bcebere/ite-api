@@ -17,6 +17,7 @@ class Model:
         if model not in ["GANITE", "GANITE_TORCH", "CMGP"]:
             raise Exception(f"unsupported model: {model}")
         self.core: Any
+        self.name = model
         if model == "GANITE":
             self.core = Ganite(*args, **kwargs)
         elif model == "GANITE_TORCH":

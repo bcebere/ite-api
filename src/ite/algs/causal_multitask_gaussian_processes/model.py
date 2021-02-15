@@ -108,7 +108,7 @@ class CMGP:
         self.initialize_hyperparameters(Train_X, Train_T, Train_Y)
 
         try:
-            self.model.optimize("bfgs", max_iters=self.max_gp_iterations, messages=True)
+            self.model.optimize("bfgs", max_iters=self.max_gp_iterations)
         except np.linalg.LinAlgError as err:
             print("Covariance matrix not invertible. ", err)
             raise err

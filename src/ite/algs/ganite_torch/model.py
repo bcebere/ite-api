@@ -108,12 +108,12 @@ class GaniteTorch:
         dim: int,
         dim_hidden: int,
         dim_out: int,
-        alpha: float = 1,
-        beta: float = 1,
-        minibatch_size: int = 256,
+        alpha: float = 2,
+        beta: float = 2,
+        minibatch_size: int = 128,
         depth: int = 1,
-        num_iterations: int = 1000,
-        test_step: int = 50,
+        num_iterations: int = 5000,
+        test_step: int = 200,
         num_discr_iterations: int = 5,
     ) -> None:
         # Hyperparameters
