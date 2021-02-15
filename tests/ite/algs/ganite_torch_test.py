@@ -64,10 +64,10 @@ def test_ganite_torch_short_training(
     )
     assert model is not None
 
-    metrics = model.train(Train_X, Train_T, Train_Y, Test_X, Test_Y)
+    outsample_metrics = model.train(Train_X, Train_T, Train_Y, Test_X, Test_Y)
 
     try:
-        metrics.plot(plt)
+        outsample_metrics.plot(plt)
     except BaseException as e:
         print("failed to plot(maybe rerun with --plots):", e)
 

@@ -8,6 +8,7 @@ import pandas as pd
 from sklearn.neighbors import KNeighborsRegressor
 
 # ite absolute
+from ite.utils.metrics import HistoricMetrics
 from ite.utils.metrics import Metrics
 
 
@@ -46,14 +47,17 @@ class CMGP:
                 "Invalid value for the input dimension! Input dimension has to be a positive integer."
             )
 
+        self.train_perf_metrics = HistoricMetrics()
+
     def train(
         self,
         Train_X: pd.DataFrame,
         Train_T: pd.DataFrame,
         Train_Y: pd.DataFrame,
+        Opt_Train_Y: pd.DataFrame,
         Test_X: pd.DataFrame,
         Test_Y: pd.DataFrame,
-    ) -> dict:
+    ) -> HistoricMetrics:
         """
         Optimizes the model hyperparameters using the factual samples for the treated and control arms.
         Train_X has to be an N x dim matrix.
@@ -109,19 +113,22 @@ class CMGP:
             print("Covariance matrix not invertible. ", err)
             raise err
 
-        epoch_metrics = self.test(Test_X, Test_Y)
-        Loss_sqrt_PEHE = epoch_metrics.sqrt_PEHE()
-        Loss_ATE = epoch_metrics.ATE()
+        metrics = self.test(Train_X, Opt_Train_Y)
+        self.train_perf_metrics.add(
+            "sqrt_PEHE", metrics.sqrt_PEHE(), "in-sample metrics"
+        )
+        self.train_perf_metrics.add("ATE", metrics.ATE(), "in-sample metrics")
 
-        metrics = {
-            "Loss_sqrt_PEHE": Loss_sqrt_PEHE,
-            "Loss_ATE": Loss_ATE,
-        }
-        print(f"Loss_sqrt_PEHE_Out: {Loss_sqrt_PEHE:.4}")
-        print(f"Loss_ATE_Out: {Loss_ATE:.4}")
-        print("")
+        metrics = self.test(Test_X, Test_Y)
+        self.train_perf_metrics.add(
+            "sqrt_PEHE", metrics.sqrt_PEHE(), "out-sample metrics"
+        )
+        self.train_perf_metrics.add("ATE", metrics.ATE(), "out-sample metrics")
 
-        return metrics
+        return self.train_perf_metrics
+
+    def train_metrics(self) -> HistoricMetrics:
+        return self.train_perf_metrics
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
         """
