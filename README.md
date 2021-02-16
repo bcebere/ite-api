@@ -25,7 +25,7 @@ For the algorithms, we simulate a short training for sanity checks, and you can 
 pytest -vvs --plots -m "not slow"
 ```
 
-The library is continuously tested on **Windows**, **Linux**, and **MacOS** using [Github Actions](https://github.com/bcebere/ite-api/actions).
+The library is tested using Python 3.8 on **Windows**, **Linux**, and **MacOS**([see on Github Actions](https://github.com/bcebere/ite-api/actions)).
 
 ## Usage
 
