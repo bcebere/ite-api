@@ -15,7 +15,7 @@ from ite.algs.ganite_torch.model import GaniteTorch
 import ite.datasets as ds
 
 
-def search(algorithm: str, iterations: int = 100) -> List[Any]:
+def search(algorithm: str, iterations: int = 2000) -> List[Any]:
     assert algorithm in ["GANITE", "GANITE_TORCH"]
 
     # load dataset

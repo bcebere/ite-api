@@ -13,6 +13,37 @@ def test_sanity() -> None:
     assert alg.GaniteTorch(10, 10, 2) is not None
 
 
+def test_hyperparams() -> None:
+    model = alg.GaniteTorch(
+        10,  # dim_in
+        2,  # dim_out
+        dim_hidden=12,
+        alpha=2,
+        beta=3,
+        minibatch_size=32,
+        depth=5,
+        num_iterations=111,
+        test_step=222,
+        num_discr_iterations=11,
+    )
+
+    assert model.minibatch_size == 32
+    assert model.alpha == 2
+    assert model.beta == 3
+    assert model.num_iterations == 111
+    assert model.test_step == 222
+    assert model.num_discr_iterations == 11
+    assert (
+        len(model.counterfactual_generator.common) == 12
+    )  # nn.Linear -> nn.Relu -> depth * (nn.Linear -> nn.Relu)
+    assert (
+        len(model.counterfactual_discriminator.model) == 13
+    )  # nn.Linear -> nn.Relu -> depth * (nn.Linear -> nn.Relu) -> nn.Linear
+    assert (
+        len(model.inference_nets.common) == 12
+    )  # nn.Linear -> nn.Relu -> depth * (nn.Linear -> nn.Relu)
+
+
 @pytest.mark.parametrize(
     "iterations",
     [

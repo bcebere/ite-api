@@ -24,13 +24,16 @@ class CounterfactualGenerator(nn.Module):
     def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
         super(CounterfactualGenerator, self).__init__()
         # Generator Layer
+        hidden = [
+            nn.Linear(DimHidden, DimHidden),
+            nn.ReLU(),
+        ] * depth
         self.common = nn.Sequential(
             nn.Linear(
                 Dim + 2, DimHidden
             ),  # Inputs: X + Treatment (1) + Factual Outcome (1) + Random Vector      (Z)
             nn.ReLU(),
-            nn.Linear(DimHidden, DimHidden),
-            nn.ReLU(),
+            *hidden,
         )
 
         self.out1 = nn.Sequential(
@@ -65,11 +68,14 @@ class CounterfactualDiscriminator(nn.Module):
 
     def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
         super(CounterfactualDiscriminator, self).__init__()
+        hidden = [
+            nn.Linear(DimHidden, DimHidden),
+            nn.ReLU(),
+        ] * depth
         self.model = nn.Sequential(
             nn.Linear(Dim + 2, DimHidden),
             nn.ReLU(),
-            nn.Linear(DimHidden, DimHidden),
-            nn.ReLU(),
+            *hidden,
             nn.Linear(DimHidden, 1),
         )
 
@@ -91,11 +97,14 @@ class InferenceNets(nn.Module):
 
     def __init__(self, Dim: int, DimHidden: int, depth: int) -> None:
         super(InferenceNets, self).__init__()
+        hidden = [
+            nn.Linear(DimHidden, DimHidden),
+            nn.ReLU(),
+        ] * depth
         self.common = nn.Sequential(
             nn.Linear(Dim, DimHidden),
             nn.ReLU(),
-            nn.Linear(DimHidden, DimHidden),
-            nn.ReLU(),
+            *hidden,
         )
         self.out1 = nn.Sequential(
             nn.Linear(DimHidden, DimHidden),
