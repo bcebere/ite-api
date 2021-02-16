@@ -1,6 +1,6 @@
 # Algorithms for individualized treatment effects estimation
 
-![Tests](https://github.com/bcebere/ite-api/workflows/Tests/badge.svg?branch=main)
+[![Tests](https://github.com/bcebere/ite-api/workflows/Tests/badge.svg?branch=main)](https://github.com/bcebere/ite-api/actions?query=workflow%3ATests)
 
 Estimating Individualized Treatment Effects(ITE) is the task that approximates whether a given treatment influences or determines an outcome([read more](https://www.vanderschaar-lab.com/individualized-treatment-effect-inference/)).
 
@@ -15,7 +15,9 @@ pip install -r requirements.txt
 pip install .
 ```
 
-## Testing ![Tests](https://github.com/bcebere/ite-api/workflows/Tests/badge.svg?branch=main)
+## Testing [![Tests](https://github.com/bcebere/ite-api/workflows/Tests/badge.svg?branch=main)](https://github.com/bcebere/ite-api/actions?query=workflow%3ATests)
+
+
 The library is covered by tests implemented using **pytest**.
 For the algorithms, we simulate a short training for sanity checks, and you can check the training metrics in the `plots/` folder.
 ```
