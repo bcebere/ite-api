@@ -15,8 +15,9 @@ pip install -r requirements.txt
 pip install .
 ```
 
-## Testing 
-[![Tests](https://github.com/bcebere/ite-api/workflows/Tests/badge.svg?branch=main)](https://github.com/bcebere/ite-api/actions?query=workflow%3ATests)
+## Testing [![Tests](https://github.com/bcebere/ite-api/workflows/Tests/badge.svg?branch=main)](https://github.com/bcebere/ite-api/actions?query=workflow%3ATests)
+
+
 The library is covered by tests implemented using **pytest**.
 For the algorithms, we simulate a short training for sanity checks, and you can check the training metrics in the `plots/` folder.
 ```
