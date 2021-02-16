@@ -1,0 +1,15 @@
+black
+flake8
+jupyter
+jupyterlab
+matplotlib
+numpy
+pandas
+pre-commit
+pyscaffold
+pytest
+pytest-cov
+pytest-plt
+setuptools
+tabulate
+tqdm
