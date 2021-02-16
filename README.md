@@ -36,7 +36,7 @@ The notebooks/ folder contain several examples and use cases for using the libra
 
  - [Train and evaluation of GANITE(PyTorch)](https://github.com/bcebere/ite-api/blob/main/notebooks/ganite_pytorch_train_evaluation.ipynb) - Example on how to train and test the GANITE model, PyTorch version.
 
- - [Train and evaluation of CMGP](https://github.com/bcebere/ite-api/tree/main/notebooks) - Example on how to train and test the CMGP model.
+ - [Train and evaluation of CMGP](https://github.com/bcebere/ite-api/blob/main/notebooks/cmgp_train_evaluation.ipynb) - Example on how to train and test the CMGP model.
 
  - [Train and evaluation of the unified API](https://github.com/bcebere/ite-api/blob/main/notebooks/unified_api_train_evaluation.ipynb) - Example on how to train and test all the model using the unified API.
 
