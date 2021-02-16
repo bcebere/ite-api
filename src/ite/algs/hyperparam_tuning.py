@@ -6,7 +6,6 @@ from typing import List
 from skopt import gp_minimize
 from skopt.space import Categorical
 from skopt.space import Integer
-from skopt.space import Real
 from skopt.utils import use_named_args
 
 # ite absolute
@@ -35,8 +34,8 @@ def search(algorithm: str, iterations: int = 2000) -> List[Any]:
             name="dim_hidden",
         )
     )
-    search_space.append(Real(1e-6, 10.0, "log-uniform", name="alpha"))
-    search_space.append(Real(1e-6, 10.0, "log-uniform", name="beta"))
+    search_space.append(Categorical([0, 0.1, 0.5, 1, 2, 5, 10], name="alpha"))
+    search_space.append(Categorical([0, 0.1, 0.5, 1, 2, 5, 10], name="beta"))
     search_space.append(Integer(1, 9, name="depth"))
 
     # define the function used to evaluate a given configuration
@@ -64,9 +63,5 @@ def search(algorithm: str, iterations: int = 2000) -> List[Any]:
 
     # perform optimization
     result = gp_minimize(evaluate_model, search_space)
-
-    # summarizing finding:
-    print(f"Best Accuracy: {1.0 - result.fun:.3f}")
-    print(f"Best Parameters: {result.x}")
 
     return result.x
