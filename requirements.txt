@@ -9,6 +9,7 @@ pyscaffold
 pytest
 pytest-cov
 pytest-plt
+scikit-optimize
 scipy
 setuptools
 sklearn

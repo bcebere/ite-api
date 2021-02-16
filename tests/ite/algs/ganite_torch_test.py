@@ -53,8 +53,8 @@ def test_ganite_torch_short_training(
 
     model = alg.GaniteTorch(
         dim,
-        dim_hidden,
         dim_outcome,
+        dim_hidden=dim_hidden,
         num_iterations=iterations,
         alpha=alpha,
         beta=beta,

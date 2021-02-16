@@ -28,8 +28,8 @@ def test_unified_api_ganite(ganite_ver: str) -> None:
     model = Model(
         ganite_ver,
         dim,
-        dim_hidden,
         dim_outcome,
+        dim_hidden=dim_hidden,
         num_iterations=10,
         alpha=2,
         beta=2,

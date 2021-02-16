@@ -196,8 +196,8 @@ class Ganite:
     def __init__(
         self,
         dim: int,
-        dim_hidden: int,
         dim_out: int,
+        dim_hidden: int = 8,
         alpha: float = 2,
         beta: float = 2,
         minibatch_size: int = 128,

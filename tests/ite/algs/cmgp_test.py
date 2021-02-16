@@ -31,7 +31,7 @@ def test_cmgp_short_training(
     )
     assert model is not None
 
-    for experiment in range(8):
+    for experiment in range(4):
         dataset = ds.load(
             "twins",
             train_ratio,

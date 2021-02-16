@@ -52,8 +52,8 @@ def test_ganite_short_training(
 
     model = alg.Ganite(
         dim,
-        dim_hidden,
         dim_outcome,
+        dim_hidden=dim_hidden,
         num_iterations=iterations,
         alpha=alpha,
         beta=beta,
