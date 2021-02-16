@@ -33,8 +33,8 @@ class CounterfactualGenerator:
         )  # Inputs: X + Treatment (1) + Factual Outcome (1) + Random Vector (Z)
         self.G_b1 = tf.Variable(tf.zeros(shape=[DimHidden]))
 
-        self.G_W2 = tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))
-        self.G_b2 = tf.Variable(tf.zeros(shape=[DimHidden]))
+        self.G_W2 = [tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))] * depth
+        self.G_b2 = [tf.Variable(tf.zeros(shape=[DimHidden]))] * depth
 
         self.G_W31 = tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))
         self.G_b31 = tf.Variable(
@@ -74,7 +74,12 @@ class CounterfactualGenerator:
     def forward(self, x: tf.Variable, t: tf.Variable, y: tf.Variable) -> tf.Variable:
         inputs = tf.concat(axis=1, values=[x, t, y])
         G_h1 = tf.nn.relu(tf.matmul(inputs, self.G_W1) + self.G_b1)
-        G_h2 = tf.nn.relu(tf.matmul(G_h1, self.G_W2) + self.G_b2)
+
+        G_h2 = G_h1
+        for hidden_layer in range(len(self.G_W2)):
+            G_h2 = tf.nn.relu(
+                tf.matmul(G_h2, self.G_W2[hidden_layer]) + self.G_b2[hidden_layer]
+            )
 
         G_h31 = tf.nn.relu(tf.matmul(G_h2, self.G_W31) + self.G_b31)
         G_prob1 = tf.matmul(G_h31, self.G_W32) + self.G_b32
@@ -100,8 +105,8 @@ class CounterfactualDiscriminator:
         )  # Inputs: X + Factual Outcomes + Estimated Counterfactual Outcomes
         self.D_b1 = tf.Variable(tf.zeros(shape=[DimHidden]))
 
-        self.D_W2 = tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))
-        self.D_b2 = tf.Variable(tf.zeros(shape=[DimHidden]))
+        self.D_W2 = [tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))] * depth
+        self.D_b2 = [tf.Variable(tf.zeros(shape=[DimHidden]))] * depth
 
         self.D_W3 = tf.Variable(tf_utils.xavier_init([DimHidden, 1]))
         self.D_b3 = tf.Variable(tf.zeros(shape=[1]))
@@ -125,7 +130,13 @@ class CounterfactualDiscriminator:
         inputs = tf.concat(axis=1, values=[x, inp0, inp1])
 
         D_h1 = tf.nn.relu(tf.matmul(inputs, self.D_W1) + self.D_b1)
-        D_h2 = tf.nn.relu(tf.matmul(D_h1, self.D_W2) + self.D_b2)
+
+        D_h2 = D_h1
+        for hidden_layer in range(len(self.D_W2)):
+            D_h2 = tf.nn.relu(
+                tf.matmul(D_h2, self.D_W2[hidden_layer]) + self.D_b2[hidden_layer]
+            )
+
         D_logit = tf.matmul(D_h2, self.D_W3) + self.D_b3
 
         return D_logit
@@ -140,8 +151,8 @@ class InferenceNets:
         self.I_W1 = tf.Variable(tf_utils.xavier_init([(Dim), DimHidden]))
         self.I_b1 = tf.Variable(tf.zeros(shape=[DimHidden]))
 
-        self.I_W2 = tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))
-        self.I_b2 = tf.Variable(tf.zeros(shape=[DimHidden]))
+        self.I_W2 = [tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))] * depth
+        self.I_b2 = [tf.Variable(tf.zeros(shape=[DimHidden]))] * depth
 
         self.I_W31 = tf.Variable(tf_utils.xavier_init([DimHidden, DimHidden]))
         self.I_b31 = tf.Variable(tf.zeros(shape=[DimHidden]))
@@ -172,7 +183,12 @@ class InferenceNets:
 
     def forward(self, x: tf.Variable) -> tf.Variable:
         I_h1 = tf.nn.relu(tf.matmul(x, self.I_W1) + self.I_b1)
-        I_h2 = tf.nn.relu(tf.matmul(I_h1, self.I_W2) + self.I_b2)
+
+        I_h2 = I_h1
+        for hidden_layer in range(len(self.I_W2)):
+            I_h2 = tf.nn.relu(
+                tf.matmul(I_h2, self.I_W2[hidden_layer]) + self.I_b2[hidden_layer]
+            )
 
         I_h31 = tf.nn.relu(tf.matmul(I_h2, self.I_W31) + self.I_b31)
         I_prob1 = tf.matmul(I_h31, self.I_W32) + self.I_b32
