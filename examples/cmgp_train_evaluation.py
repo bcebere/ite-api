@@ -87,6 +87,6 @@ utils.sqrt_PEHE(hat_y.to_numpy(), Test_Y)
 
 # ## Test
 # Will can run inferences and get metrics directly
-metrics = model.test(Test_X, Test_Y)
+tmetrics = model.test(Test_X, Test_Y)
 
-metrics.print()
+tmetrics.print()
