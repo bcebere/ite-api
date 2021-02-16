@@ -27,7 +27,7 @@ jobs:
       - name: Lint with flake8
         run: pre-commit run --all-files
 
-  Test library:
+  Library:
     needs: [Linter]
     runs-on: ${{ matrix.os }}
     strategy:
