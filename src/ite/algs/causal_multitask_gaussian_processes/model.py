@@ -117,12 +117,14 @@ class CMGP:
             "sqrt_PEHE", metrics.sqrt_PEHE(), "in-sample metrics"
         )
         self.train_perf_metrics.add("ATE", metrics.ATE(), "in-sample metrics")
+        self.train_perf_metrics.add("MSE", metrics.MSE(), "in-sample metrics")
 
         metrics = self.test(Test_X, Test_Y)
         self.train_perf_metrics.add(
             "sqrt_PEHE", metrics.sqrt_PEHE(), "out-sample metrics"
         )
         self.train_perf_metrics.add("ATE", metrics.ATE(), "out-sample metrics")
+        self.train_perf_metrics.add("MSE", metrics.ATE(), "out-sample metrics")
 
         return self.train_perf_metrics
 

@@ -34,6 +34,14 @@ class Metrics:
 
         return utils.ATE(self.actual, self.estimated)
 
+    def MSE(self) -> float:
+        """
+        Mean squared error.
+        Computes the mean squared error between labels and predictions.
+        """
+
+        return np.mean(utils.squared_difference(self.estimated, self.actual))
+
     def worst_mistakes(self, top_k: int = 5) -> List[int]:
         """
         Helper for visualising the entries with the most significant error reported to the PEHE metric.
@@ -51,6 +59,7 @@ class Metrics:
         """
         print(f"sqrt_PHE = {self.sqrt_PEHE():.3f}")
         print(f"ATE = {self.ATE():.3f}")
+        print(f"MSE = {self.MSE():.3f}")
         print(f"Top 5 worst mistakes(indices) = {self.worst_mistakes()}")
 
 

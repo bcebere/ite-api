@@ -389,6 +389,7 @@ class Ganite:
                     "sqrt_PEHE", metrics_for_step.sqrt_PEHE(), metric_block
                 )
                 self.train_perf_metrics.add("ATE", metrics_for_step.ATE(), metric_block)
+                self.train_perf_metrics.add("MSE", metrics_for_step.MSE(), metric_block)
 
                 metric_block = "ITE Block out-sample metrics"
                 metrics_for_step = self.test(Test_X, Test_Y)
@@ -397,6 +398,7 @@ class Ganite:
                     "sqrt_PEHE", metrics_for_step.sqrt_PEHE(), metric_block
                 )
                 self.train_perf_metrics.add("ATE", metrics_for_step.ATE(), metric_block)
+                self.train_perf_metrics.add("MSE", metrics_for_step.MSE(), metric_block)
 
         return self.train_perf_metrics
 

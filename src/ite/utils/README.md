@@ -17,6 +17,7 @@ API:
 
  - `sqrt_PEHE` - returns the squared root PEHE measure of the two entities.
  - `ATE` - returns the ATE measure of the two entities.
+ - `MSE` - returns the Mean squared error of the two entities.
  - `worst_mistakes` - Returns the indices of the top k biggest PEHE errors.
  - `print` - print all the metrics.
 

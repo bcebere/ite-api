@@ -39,7 +39,7 @@ For __GANITE__, we try to optimize the following hyperparameters using the range
 | dim_hidden | {dim, int(dim/2), int(dim/3), int(dim/4), int(dim/5)} | the size of the hidden layers. |
 | depth |{1, 3, 5, 7, 9} | the number of hidden layers in the generator and inference blocks. |
 | alpha | {0, 0.1, 0.5, 1, 2, 5, 10} | weight for the Generator block loss. |
-| beta | {0, 0.1, 0.5, 1, 2, 5, 10} | weight the ITE block loss. |
+| beta | {0, 0.1, 0.5, 1, 2, 5, 10} | weight for the ITE block loss. |
 | num_discr_iterations | [3, 10] | number of iterations executed by the Counterfactual discriminator. |
 | minibatch_size | {32, 64, 128, 256} | the size of the dataset batches. |
 
