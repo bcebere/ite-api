@@ -5,7 +5,7 @@ The implementation is adapted from [the original version](https://bitbucket.org/
 
 ## Main differences from the original code:
  - Ran static analysis and linters and fixed the errors. Left only the code relevant to the CMGP task.
- - Activated the intialiaze_hyperparameters call, as the paper mentions.
+ - Activated the initialize_hyperparameters call, as the paper mentions.
  - Moved the metrics in the `utils` module.
 
 ## Breakdown
