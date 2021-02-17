@@ -22,7 +22,7 @@ API:
 
 
 
-2.`HistoricMetrics` class. Helpers for visualising the evolution of the performance metrics. Useful for monitoring the training.
+2.`HistoricMetrics` class. Helpers for visualizing the evolution of the performance metrics. Useful for monitoring the training.
 
 API:
 
