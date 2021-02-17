@@ -62,4 +62,4 @@ Library:
 3. [Original GANITE code](https://bitbucket.org/mvdschaar/mlforhealthlabpub/src/master/alg/ganite/).
 4. [CMGP Reference implementation](https://bitbucket.org/mvdschaar/mlforhealthlabpub/src/master/alg/causal_multitask_gaussian_processes_ite/).
 5. [Twins dataset](https://www.nber.org/data/linked-birth-infant-death-data-vital-statistics-data.html).
-6. [Clairvoyance](https://bitbucket.org/mvdschaar/mlforhealthlabpub/src/02edab3b2b6d635470fa80184bbfd03b8bf8082d/app/clairvoyance/),
+6. [Clairvoyance](https://bitbucket.org/mvdschaar/mlforhealthlabpub/src/02edab3b2b6d635470fa80184bbfd03b8bf8082d/app/clairvoyance/).
