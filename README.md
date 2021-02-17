@@ -6,8 +6,6 @@ Estimating Individualized Treatment Effects(ITE) is the task that approximates w
 
 This library creates an unified API for two algorithms for ITE, **[GANITE](https://openreview.net/pdf?id=ByKWUeWA-)** and **[CMGP](https://arxiv.org/pdf/1704.02801.pdf)**, trained over the **[Twins](https://www.nber.org/data/linked-birth-infant-death-data-vital-statistics-data.html)** dataset.
 
-## Algorithms
-
 ## Installation
 
 ```
@@ -43,3 +41,25 @@ The [notebooks/](https://github.com/bcebere/ite-api/tree/main/notebooks) folder 
  - [Hyperparameter tuning](https://github.com/bcebere/ite-api/blob/main/notebooks/hyperparam_tuning.ipynb) - Example of how to search for optimal hyperparameters for the GANITE implementations.
 
 The [examples/](https://github.com/bcebere/ite-api/tree/main/examples) folder contains the converted notebooks to CLI scripts.
+
+## Code breakdown
+Algorithms:
+
+- [GANITE(Tensorflow) details](https://github.com/bcebere/ite-api/tree/main/src/ite/algs/ganite).
+- [GANITE(PyTorch) details](https://github.com/bcebere/ite-api/tree/main/src/ite/algs/ganite_torch).
+- [CMGP details](https://github.com/bcebere/ite-api/tree/main/src/ite/algs/causal_multitask_gaussian_processes).
+
+Library:
+
+- [Dataset loading and pre-processing](https://github.com/bcebere/ite-api/tree/main/src/ite/datasets).
+- [Metrics and helpers](https://github.com/bcebere/ite-api/tree/main/src/ite/utils).
+- [Unified API](https://github.com/bcebere/ite-api/tree/main/src/ite/algs).
+- [Hyperparameter tuning](https://github.com/bcebere/ite-api/tree/main/src/ite/algs).
+
+## References
+1. Jinsung Yoon, James Jordon, Mihaela van der Schaar, "GANITE: Estimation of Individualized Treatment Effects using Generative Adversarial Nets", International Conference on Learning Representations (ICLR), 2018 ([Paper](https://openreview.net/forum?id=ByKWUeWA-)).
+2. Ahmed M. Alaa, Mihaela van der Schaar, "Bayesian Inference of Individualized Treatment Effects using Multi-task Gaussian Processes", NeurIPS, 2017 ([Paper](https://arxiv.org/pdf/1704.02801.pdf)).
+3. [Original GANITE code](https://bitbucket.org/mvdschaar/mlforhealthlabpub/src/master/alg/ganite/).
+4. [CMGP Reference implementation](https://bitbucket.org/mvdschaar/mlforhealthlabpub/src/master/alg/causal_multitask_gaussian_processes_ite/).
+5. [Twins dataset](https://www.nber.org/data/linked-birth-infant-death-data-vital-statistics-data.html).
+6. [Clairvoyance](https://bitbucket.org/mvdschaar/mlforhealthlabpub/src/02edab3b2b6d635470fa80184bbfd03b8bf8082d/app/clairvoyance/),
