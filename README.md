@@ -27,7 +27,7 @@ The library is tested using Python 3.8 on **Windows**, **Linux**, and **MacOS**(
 
 ## Usage
 
-The [notebooks/](https://github.com/bcebere/ite-api/tree/main/notebooks) folder contains several examples and use cases for using the library:
+The [notebooks/](https://github.com/bcebere/ite-api/tree/main/notebooks) folder contains several examples and use-cases for the library:
 
 
  - [Training and evaluation of GANITE(Tensorflow)](https://github.com/bcebere/ite-api/blob/main/notebooks/ganite_train_evaluation.ipynb) - Example of how to train and test the GANITE model, Tensorflow version.
