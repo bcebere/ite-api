@@ -11,8 +11,8 @@ The main entrypoint for the module is the `Model` class.
 
 The constructor accepts the following parameters:
 
- - `mode`: Mandatory name for the model to use. Can be from `["GANITE", "GANITE_TORCH", "CMGP"]`.
- - **kwargs: Any relevant parameter for the chosen model is directly fowarded to its constructor.
+ - `model`: Mandatory name for the model to use. Can be from `["GANITE", "GANITE_TORCH", "CMGP"]`.
+ - **kwargs: Any relevant parameter for the chosen model is directly forwarded to its constructor.
 
 
 It exposes the following methods:
@@ -24,7 +24,7 @@ It exposes the following methods:
 ## Hyperparameter tuning
 The module provides support for hyper-parameter searching for the __GANITE__(for both Tensorflow and PyTorch version) algorithm over the [Twins](https://bitbucket.org/mvdschaar/mlforhealthlabpub/src/master/data/twins/) dataset.
 
-The algorithm used for performing hyperparameter optimization is the [__Bayesian Optimization__](https://en.wikipedia.org/wiki/Bayesian_optimization).
+The algorithm used for performing hyperparameter optimization is [__Bayesian Optimization__](https://en.wikipedia.org/wiki/Bayesian_optimization).
 
 __Bayesian Optimization__ provides a principled technique based on [Bayes Theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem) to direct a search of a global optimization problem that is efficient and effective. It works by building a probabilistic model of the objective function, called the surrogate function, that is then searched efficiently with an acquisition function before candidate samples are chosen to evaluate the real objective function.
 
