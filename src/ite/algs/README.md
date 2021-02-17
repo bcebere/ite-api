@@ -1,5 +1,5 @@
 # Unified API
- This module contains an unified API for the GANITE and CMGP algorithms.
+ This module contains a unified API for the GANITE and CMGP algorithms.
 
 ## Algorithms
  - [GANITE(Tensorflow)](https://github.com/bcebere/ite-api/tree/main/src/ite/algs/ganite).
