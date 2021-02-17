@@ -4,7 +4,7 @@
 
 Estimating Individualized Treatment Effects(ITE) is the task that approximates whether a given treatment influences or determines an outcome([read more here](https://www.vanderschaar-lab.com/individualized-treatment-effect-inference/)).
 
-This library creates an unified API for two algorithms for ITE, **[GANITE](https://openreview.net/pdf?id=ByKWUeWA-)** and **[CMGP](https://arxiv.org/pdf/1704.02801.pdf)**, trained over the **[Twins](https://www.nber.org/data/linked-birth-infant-death-data-vital-statistics-data.html)** dataset.
+This library creates a unified API for two algorithms for ITE, **[GANITE](https://openreview.net/pdf?id=ByKWUeWA-)** and **[CMGP](https://arxiv.org/pdf/1704.02801.pdf)**, trained over the **[Twins](https://www.nber.org/data/linked-birth-infant-death-data-vital-statistics-data.html)** dataset.
 
 ## Installation
 
